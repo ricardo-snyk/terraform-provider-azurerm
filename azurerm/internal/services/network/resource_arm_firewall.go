@@ -62,7 +62,6 @@ func resourceArmFirewall() *schema.Resource {
 						},
 						"subnet_id": {
 							Type:         schema.TypeString,
-<<<<<<< HEAD:azurerm/internal/services/network/resource_arm_firewall.go
 							Optional:     true,
 							ForceNew:     true,
 							ValidateFunc: validateAzureFirewallSubnetName,
@@ -71,25 +70,6 @@ func resourceArmFirewall() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: azure.ValidateResourceID,
-=======
-							Required:     true,
-							ValidateFunc: azure.ValidateResourceID,
-						},
-						"internal_public_ip_address_id": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: azure.ValidateResourceID,
-							Deprecated:   "This field has been deprecated. Use `public_ip_address_id` instead.",
-							//ConflictsWith: []string{"ip_configuration.0.public_ip_address_id"},
-						},
-						"public_ip_address_id": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: azure.ValidateResourceID,
-							//ConflictsWith: []string{"ip_configuration.0.internal_public_ip_address_id"},
->>>>>>> Disabled validations for azurerm_firewall and azurerm_redis_cache:azurerm/resource_arm_firewall.go
 						},
 						"private_ip_address": {
 							Type:     schema.TypeString,

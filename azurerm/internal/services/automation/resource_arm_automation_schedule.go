@@ -82,7 +82,7 @@ func resourceArmAutomationSchedule() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: suppress.RFC3339Time,
-				ValidateFunc:     validate.RFC3339DateInFutureBy(time.Duration(5) * time.Minute),
+				//ValidateFunc:     validate.RFC3339DateInFutureBy(time.Duration(5) * time.Minute),
 				//defaults to now + 7 minutes in create function if not set
 			},
 
