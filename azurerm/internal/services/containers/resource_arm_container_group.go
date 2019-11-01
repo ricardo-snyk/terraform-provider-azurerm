@@ -325,25 +325,25 @@ func resourceArmContainerGroup() *schema.Resource {
 									},
 
 									"share_name": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringIsNotEmpty,
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+										// ValidateFunc: validation.StringIsNotEmpty,
 									},
 
 									"storage_account_name": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringIsNotEmpty,
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+										// ValidateFunc: validation.StringIsNotEmpty,
 									},
 
 									"storage_account_key": {
-										Type:         schema.TypeString,
-										Required:     true,
-										Sensitive:    true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringIsNotEmpty,
+										Type:      schema.TypeString,
+										Optional:  true,
+										Sensitive: true,
+										ForceNew:  true,
+										// ValidateFunc: validation.StringIsNotEmpty,
 									},
 								},
 							},
