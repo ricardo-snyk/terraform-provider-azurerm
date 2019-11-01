@@ -23,8 +23,8 @@ func resourceArmMonitorActionGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type: schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 				//ValidateFunc: validate.NoEmptyStrings,
 			},
@@ -32,15 +32,15 @@ func resourceArmMonitorActionGroup() *schema.Resource {
 			"resource_group_name": resourceGroupNameSchema(),
 
 			"short_name": {
-				Type: schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				//ValidateFunc: validation.StringLenBetween(1, 12),
 			},
 
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				// Default:  true,
 			},
 
 			"email_receiver": {
