@@ -392,12 +392,20 @@ func resourceArmStorageAccount() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				// Ignore the drift: static_website.#: "1" => "0"
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old == "1" && new == "0" {
+						return true
+					}
+					return false
+				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"index_document": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringIsNotEmpty,
+							Type:     schema.TypeString,
+							Optional: true,
+							// ValidateFunc: validation.StringIsNotEmpty,
+							Default: "index.html",
 						},
 						"error_404_document": {
 							Type:         schema.TypeString,
