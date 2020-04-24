@@ -126,8 +126,7 @@ func resourceArmSubnet() *schema.Resource {
 
 			"enforce_private_link_endpoint_network_policies": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 
 			"enforce_private_link_service_network_policies": {
