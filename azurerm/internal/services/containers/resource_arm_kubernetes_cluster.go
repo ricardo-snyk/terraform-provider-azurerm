@@ -123,10 +123,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 						},
 
 						"client_secret": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Sensitive:    true,
-							ValidateFunc: validation.StringIsNotEmpty,
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+							// ValidateFunc: validation.StringIsNotEmpty,
 						},
 					},
 				},
