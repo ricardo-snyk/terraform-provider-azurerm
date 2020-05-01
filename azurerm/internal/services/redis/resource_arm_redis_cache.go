@@ -89,12 +89,12 @@ func resourceArmRedisCache() *schema.Resource {
 			"minimum_tls_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  redis.OneFullStopZero,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(redis.OneFullStopZero),
-					string(redis.OneFullStopOne),
-					string(redis.OneFullStopTwo),
-				}, false),
+				// Default:  redis.OneFullStopZero,
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	string(redis.OneFullStopZero),
+				// 	string(redis.OneFullStopOne),
+				// 	string(redis.OneFullStopTwo),
+				// }, false),
 			},
 
 			"shard_count": {
