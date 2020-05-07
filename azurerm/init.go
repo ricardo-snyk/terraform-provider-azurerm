@@ -1,4 +1,4 @@
-package aws
+package azurerm
 
 import (
 	"io/ioutil"
