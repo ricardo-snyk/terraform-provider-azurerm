@@ -130,19 +130,19 @@ func resourceArmMsSqlElasticPool() *schema.Resource {
 			},
 
 			"max_size_bytes": {
-				Type:          schema.TypeInt,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"max_size_gb"},
-				ValidateFunc:  validation.IntAtLeast(0),
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				// ConflictsWith: []string{"max_size_gb"},
+				// ValidateFunc: validation.IntAtLeast(0),
 			},
 
 			"max_size_gb": {
-				Type:          schema.TypeFloat,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"max_size_bytes"},
-				ValidateFunc:  validation.FloatAtLeast(0),
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Computed: true,
+				// ConflictsWith: []string{"max_size_bytes"},
+				// ValidateFunc:  validation.FloatAtLeast(0),
 			},
 
 			"zone_redundant": {

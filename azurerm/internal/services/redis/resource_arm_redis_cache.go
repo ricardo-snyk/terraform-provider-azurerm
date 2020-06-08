@@ -89,12 +89,12 @@ func resourceArmRedisCache() *schema.Resource {
 			"minimum_tls_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  redis.OneFullStopZero,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(redis.OneFullStopZero),
-					string(redis.OneFullStopOne),
-					string(redis.OneFullStopTwo),
-				}, false),
+				// Default:  redis.OneFullStopZero,
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	string(redis.OneFullStopZero),
+				// 	string(redis.OneFullStopOne),
+				// 	string(redis.OneFullStopTwo),
+				// }, false),
 			},
 
 			"shard_count": {
@@ -146,10 +146,10 @@ func resourceArmRedisCache() *schema.Resource {
 						},
 
 						"maxmemory_policy": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "volatile-lru",
-							ValidateFunc: validateRedisMaxMemoryPolicy,
+							Type:     schema.TypeString,
+							Optional: true,
+							// Default:      "volatile-lru",
+							// ValidateFunc: validateRedisMaxMemoryPolicy,
 						},
 
 						"maxfragmentationmemory_reserved": {
@@ -164,9 +164,9 @@ func resourceArmRedisCache() *schema.Resource {
 						},
 
 						"rdb_backup_frequency": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validateRedisBackupFrequency,
+							Type:     schema.TypeInt,
+							Optional: true,
+							//ValidateFunc: validateRedisBackupFrequency,
 						},
 
 						"rdb_backup_max_snapshot_count": {

@@ -40,10 +40,10 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				// ValidateFunc: validation.StringIsNotEmpty,
 			},
 
 			"resource_group_name": azure.SchemaResourceGroupName(),
@@ -55,9 +55,9 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 			//lintignore:S018
 			"scopes": {
 				Type:     schema.TypeSet,
-				Required: true,
-				MinItems: 1,
-				MaxItems: 1,
+				Optional: true,
+				//MinItems: 1,
+				//MaxItems: 1,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: azure.ValidateResourceID,
@@ -67,8 +67,8 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 
 			"criteria": {
 				Type:     schema.TypeList,
-				Required: true,
-				MinItems: 1,
+				Optional: true,
+				//MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"metric_namespace": {
@@ -166,7 +166,6 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 			"auto_mitigate": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 
 			"description": {
@@ -177,13 +176,11 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 
 			"frequency": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "PT1M",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PT1M",
 					"PT5M",
@@ -196,14 +193,12 @@ func resourceArmMonitorMetricAlert() *schema.Resource {
 			"severity": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      3,
 				ValidateFunc: validation.IntBetween(0, 4),
 			},
 
 			"window_size": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "PT5M",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PT1M",
 					"PT5M",

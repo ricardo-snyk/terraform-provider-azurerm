@@ -37,24 +37,24 @@ func resourceArmMonitorActionGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				// ValidateFunc: validation.StringIsNotEmpty,
 			},
 
 			"resource_group_name": azure.SchemaResourceGroupName(),
 
 			"short_name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringLenBetween(1, 12),
+				Type:     schema.TypeString,
+				Optional: true,
+				// ValidateFunc: validation.StringLenBetween(1, 12),
 			},
 
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				// Default:  true,
 			},
 
 			"email_receiver": {
