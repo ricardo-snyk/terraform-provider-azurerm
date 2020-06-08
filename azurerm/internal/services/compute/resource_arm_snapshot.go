@@ -38,10 +38,10 @@ func resourceArmSnapshot() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: ValidateSnapshotName,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				// ValidateFunc: ValidateSnapshotName,
 			},
 
 			"location": azure.SchemaLocation(),
