@@ -58,7 +58,7 @@ func SchemaStorageAccountCorsRule() *schema.Schema {
 				"max_age_in_seconds": {
 					Type:         schema.TypeInt,
 					Required:     true,
-					ValidateFunc: validation.IntBetween(1, 2000000000),
+					ValidateFunc: validation.IntBetween(0, 2000000000),
 				},
 			},
 		},
