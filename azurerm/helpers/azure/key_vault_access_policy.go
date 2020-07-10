@@ -31,6 +31,7 @@ func SchemaKeyVaultCertificatePermissions() *schema.Schema {
 				string(keyvault.Restore),
 				string(keyvault.Setissuers),
 				string(keyvault.Update),
+				"all",  // RM-4117
 			}, true),
 			DiffSuppressFunc: suppress.CaseDifference,
 		},
@@ -60,6 +61,7 @@ func SchemaKeyVaultKeyPermissions() *schema.Schema {
 				string(keyvault.KeyPermissionsUpdate),
 				string(keyvault.KeyPermissionsVerify),
 				string(keyvault.KeyPermissionsWrapKey),
+				"all",  // RM-4117
 			}, true),
 			DiffSuppressFunc: suppress.CaseDifference,
 		},
@@ -81,6 +83,7 @@ func SchemaKeyVaultSecretPermissions() *schema.Schema {
 				string(keyvault.SecretPermissionsRecover),
 				string(keyvault.SecretPermissionsRestore),
 				string(keyvault.SecretPermissionsSet),
+				"all",  // RM-4117
 			}, true),
 			DiffSuppressFunc: suppress.CaseDifference,
 		},
