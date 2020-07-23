@@ -51,6 +51,16 @@ func resourceArmNetworkInterface() *schema.Resource {
 
 			"resource_group_name": azure.SchemaResourceGroupName(),
 
+			"network_security_group_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: azure.ValidateResourceIDOrEmpty,
+				// For v0.35.3, to be removed in next release
+				DiffSuppressFunc: func(_, _, _ string, _ *schema.ResourceData) bool {
+					return true
+				},
+			},
+
 			"ip_configuration": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -452,6 +462,12 @@ func resourceArmNetworkInterfaceRead(d *schema.ResourceData, meta interface{}) e
 
 		if err := d.Set("dns_servers", dnsServers); err != nil {
 			return fmt.Errorf("Error setting `applied_dns_servers`: %+v", err)
+		}
+
+		if nsg := props.NetworkSecurityGroup; nsg != nil {
+			d.Set("network_security_group_id", nsg.ID)
+		} else {
+			d.Set("network_security_group_id", "")
 		}
 
 		d.Set("enable_ip_forwarding", resp.EnableIPForwarding)
