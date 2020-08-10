@@ -681,10 +681,10 @@ func resourceArmApplicationGateway() *schema.Resource {
 						},
 
 						"data": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringIsNotEmpty,
-							Sensitive:    true,
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringIsNotEmpty,
+							Sensitive: true,
 						},
 
 						"id": {
