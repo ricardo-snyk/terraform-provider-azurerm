@@ -55,10 +55,6 @@ func resourceArmNetworkInterface() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: azure.ValidateResourceIDOrEmpty,
-				// For v0.35.3, to be removed in next release
-				DiffSuppressFunc: func(_, _, _ string, _ *schema.ResourceData) bool {
-					return true
-				},
 			},
 
 			"ip_configuration": {
