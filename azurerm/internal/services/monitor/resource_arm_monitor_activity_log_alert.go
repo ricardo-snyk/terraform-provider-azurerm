@@ -96,7 +96,7 @@ func resourceArmMonitorActivityLogAlert() *schema.Resource {
 								"Warning",
 								"Error",
 								"Critical",
-							}, false),
+							}, true),
 						},
 						"resource_provider": {
 							Type:     schema.TypeString,
