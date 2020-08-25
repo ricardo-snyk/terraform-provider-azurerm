@@ -12,6 +12,10 @@ func ExtendedAuditingSchema() *schema.Schema {
 		Type:     schema.TypeList,
 		Optional: true,
 		MaxItems: 1,
+		// For v0.38.0, to be removed in next release
+		DiffSuppressFunc: func(_, _, _ string, _ *schema.ResourceData) bool {
+			return true
+		},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"storage_account_access_key": {
