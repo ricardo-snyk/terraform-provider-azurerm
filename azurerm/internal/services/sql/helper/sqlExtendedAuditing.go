@@ -18,13 +18,6 @@ func ExtendedAuditingSchema() *schema.Schema {
 		},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"storage_account_access_key": {
-					Type:         schema.TypeString,
-					Required:     true,
-					Sensitive:    true,
-					ValidateFunc: validation.StringIsNotEmpty,
-				},
-
 				"storage_endpoint": {
 					Type:         schema.TypeString,
 					Required:     true,
@@ -73,11 +66,7 @@ func FlattenAzureRmSqlServerBlobAuditingPolicies(extendedServerBlobAuditingPolic
 	if extendedServerBlobAuditingPolicy == nil || extendedServerBlobAuditingPolicy.State == sql.BlobAuditingPolicyStateDisabled {
 		return []interface{}{}
 	}
-	var storageEndpoint, storageAccessKey string
-	// storage_account_access_key will not be returned, so we transfer the schema value
-	if v, ok := d.GetOk("extended_auditing_policy.0.storage_account_access_key"); ok {
-		storageAccessKey = v.(string)
-	}
+	var storageEndpoint string
 	if extendedServerBlobAuditingPolicy.StorageEndpoint != nil {
 		storageEndpoint = *extendedServerBlobAuditingPolicy.StorageEndpoint
 	}
@@ -93,7 +82,6 @@ func FlattenAzureRmSqlServerBlobAuditingPolicies(extendedServerBlobAuditingPolic
 
 	return []interface{}{
 		map[string]interface{}{
-			"storage_account_access_key":              storageAccessKey,
 			"storage_endpoint":                        storageEndpoint,
 			"storage_account_access_key_is_secondary": secondKeyInUse,
 			"retention_in_days":                       retentionDays,
