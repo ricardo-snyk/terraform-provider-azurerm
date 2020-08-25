@@ -116,11 +116,7 @@ func FlattenAzureRmSqlDBBlobAuditingPolicies(extendedDatabaseBlobAuditingPolicy 
 	if extendedDatabaseBlobAuditingPolicy == nil || extendedDatabaseBlobAuditingPolicy.State == sql.BlobAuditingPolicyStateDisabled {
 		return []interface{}{}
 	}
-	var storageAccessKey, storageEndpoint string
-	// storage_account_access_key will not be returned, so we transfer the schema value
-	if v, ok := d.GetOk("extended_auditing_policy.0.storage_account_access_key"); ok {
-		storageAccessKey = v.(string)
-	}
+	var storageEndpoint string
 
 	if extendedDatabaseBlobAuditingPolicy.StorageEndpoint != nil {
 		storageEndpoint = *extendedDatabaseBlobAuditingPolicy.StorageEndpoint
@@ -136,7 +132,6 @@ func FlattenAzureRmSqlDBBlobAuditingPolicies(extendedDatabaseBlobAuditingPolicy 
 
 	return []interface{}{
 		map[string]interface{}{
-			"storage_account_access_key":              storageAccessKey,
 			"storage_endpoint":                        storageEndpoint,
 			"storage_account_access_key_is_secondary": secondKeyInUse,
 			"retention_in_days":                       retentionDays,
