@@ -432,87 +432,87 @@ func resourceArmKubernetesCluster() *schema.Resource {
 				Computed: true,
 			},
 
-			"kube_admin_config": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"host": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"username": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"password": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-						"client_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"client_key": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-						"cluster_ca_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
+			// "kube_admin_config": {
+			// 	Type:     schema.TypeList,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"host": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"username": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"password": {
+			// 				Type:      schema.TypeString,
+			// 				Computed:  true,
+			// 				Sensitive: true,
+			// 			},
+			// 			"client_certificate": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"client_key": {
+			// 				Type:      schema.TypeString,
+			// 				Computed:  true,
+			// 				Sensitive: true,
+			// 			},
+			// 			"cluster_ca_certificate": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 		},
+			// 	},
+			// },
 
-			"kube_admin_config_raw": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
+			// "kube_admin_config_raw": {
+			// 	Type:      schema.TypeString,
+			// 	Computed:  true,
+			// 	Sensitive: true,
+			// },
 
-			"kube_config": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"host": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"username": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"password": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-						"client_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"client_key": {
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-						"cluster_ca_certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
+			// "kube_config": {
+			// 	Type:     schema.TypeList,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"host": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"username": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"password": {
+			// 				Type:      schema.TypeString,
+			// 				Computed:  true,
+			// 				Sensitive: true,
+			// 			},
+			// 			"client_certificate": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"client_key": {
+			// 				Type:      schema.TypeString,
+			// 				Computed:  true,
+			// 				Sensitive: true,
+			// 			},
+			// 			"cluster_ca_certificate": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 		},
+			// 	},
+			// },
 
-			"kube_config_raw": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
+			// "kube_config_raw": {
+			// 	Type:      schema.TypeString,
+			// 	Computed:  true,
+			// 	Sensitive: true,
+			// },
 		},
 	}
 }
@@ -867,10 +867,13 @@ func resourceArmKubernetesClusterRead(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error retrieving Managed Kubernetes Cluster %q (Resource Group %q): %+v", id.Name, id.ResourceGroup, err)
 	}
 
-	profile, err := client.GetAccessProfile(ctx, id.ResourceGroup, id.Name, "clusterUser")
-	if err != nil {
-		return fmt.Errorf("Error retrieving Access Profile for Managed Kubernetes Cluster %q (Resource Group %q): %+v", id.Name, id.ResourceGroup, err)
-	}
+	// Disabling GetAccessProfile to avoid requiring this permission:
+	// Microsoft.ContainerService/managedClusters/accessProfiles/listCredential/action
+
+	// profile, err := client.GetAccessProfile(ctx, id.ResourceGroup, id.Name, "clusterUser")
+	// if err != nil {
+	// 	return fmt.Errorf("Error retrieving Access Profile for Managed Kubernetes Cluster %q (Resource Group %q): %+v", id.Name, id.ResourceGroup, err)
+	// }
 
 	d.Set("name", resp.Name)
 	d.Set("resource_group_name", id.ResourceGroup)
@@ -935,32 +938,32 @@ func resourceArmKubernetesClusterRead(d *schema.ResourceData, meta interface{}) 
 		}
 
 		// adminProfile is only available for RBAC enabled clusters with AAD
-		if props.AadProfile != nil {
-			adminProfile, err := client.GetAccessProfile(ctx, id.ResourceGroup, id.Name, "clusterAdmin")
-			if err != nil {
-				return fmt.Errorf("Error retrieving Admin Access Profile for Managed Kubernetes Cluster %q (Resource Group %q): %+v", id.Name, id.ResourceGroup, err)
-			}
+		// if props.AadProfile != nil {
+		// 	adminProfile, err := client.GetAccessProfile(ctx, id.ResourceGroup, id.Name, "clusterAdmin")
+		// 	if err != nil {
+		// 		return fmt.Errorf("Error retrieving Admin Access Profile for Managed Kubernetes Cluster %q (Resource Group %q): %+v", id.Name, id.ResourceGroup, err)
+		// 	}
 
-			adminKubeConfigRaw, adminKubeConfig := flattenKubernetesClusterAccessProfile(adminProfile)
-			d.Set("kube_admin_config_raw", adminKubeConfigRaw)
-			if err := d.Set("kube_admin_config", adminKubeConfig); err != nil {
-				return fmt.Errorf("Error setting `kube_admin_config`: %+v", err)
-			}
-		} else {
-			d.Set("kube_admin_config_raw", "")
-			d.Set("kube_admin_config", []interface{}{})
-		}
+		// 	adminKubeConfigRaw, adminKubeConfig := flattenKubernetesClusterAccessProfile(adminProfile)
+		// 	d.Set("kube_admin_config_raw", adminKubeConfigRaw)
+		// 	if err := d.Set("kube_admin_config", adminKubeConfig); err != nil {
+		// 		return fmt.Errorf("Error setting `kube_admin_config`: %+v", err)
+		// 	}
+		// } else {
+		// 	d.Set("kube_admin_config_raw", "")
+		// 	d.Set("kube_admin_config", []interface{}{})
+		// }
 	}
 
 	if err := d.Set("identity", flattenKubernetesClusterManagedClusterIdentity(resp.Identity)); err != nil {
 		return fmt.Errorf("Error setting `identity`: %+v", err)
 	}
 
-	kubeConfigRaw, kubeConfig := flattenKubernetesClusterAccessProfile(profile)
-	d.Set("kube_config_raw", kubeConfigRaw)
-	if err := d.Set("kube_config", kubeConfig); err != nil {
-		return fmt.Errorf("Error setting `kube_config`: %+v", err)
-	}
+	// kubeConfigRaw, kubeConfig := flattenKubernetesClusterAccessProfile(profile)
+	// d.Set("kube_config_raw", kubeConfigRaw)
+	// if err := d.Set("kube_config", kubeConfig); err != nil {
+	// 	return fmt.Errorf("Error setting `kube_config`: %+v", err)
+	// }
 
 	return tags.FlattenAndSet(d, resp.Tags)
 }
