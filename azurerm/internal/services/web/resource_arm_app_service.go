@@ -8,7 +8,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2019-08-01/web"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/suppress"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
@@ -118,19 +117,19 @@ func resourceArmAppService() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(web.APIHub),
-								string(web.Custom),
-								string(web.DocDb),
-								string(web.EventHub),
-								string(web.MySQL),
-								string(web.NotificationHub),
-								string(web.PostgreSQL),
-								string(web.RedisCache),
-								string(web.ServiceBus),
-								string(web.SQLAzure),
-								string(web.SQLServer),
-							}, true),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(web.APIHub),
+							// 	string(web.Custom),
+							// 	string(web.DocDb),
+							// 	string(web.EventHub),
+							// 	string(web.MySQL),
+							// 	string(web.NotificationHub),
+							// 	string(web.PostgreSQL),
+							// 	string(web.RedisCache),
+							// 	string(web.ServiceBus),
+							// 	string(web.SQLAzure),
+							// 	string(web.SQLServer),
+							// }, true),
 							DiffSuppressFunc: suppress.CaseDifference,
 						},
 					},
