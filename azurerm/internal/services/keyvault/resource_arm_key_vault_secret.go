@@ -311,6 +311,7 @@ func resourceArmKeyVaultSecretRead(d *schema.ResourceData, meta interface{}) err
 		return nil
 	}
 
+	d.Set("key_vault_id", *keyVaultId)
 	d.Set("name", id.Name)
 	d.Set("version", id.Version)
 	d.Set("content_type", secret.ContentType)

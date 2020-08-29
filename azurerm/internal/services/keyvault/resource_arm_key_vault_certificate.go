@@ -185,18 +185,18 @@ func resourceArmKeyVaultCertificate() *schema.Resource {
 												"days_before_expiry": {
 													Type:     schema.TypeInt,
 													Optional: true,
-													ForceNew: true,
-													ConflictsWith: []string{
-														"certificate_policy.0.lifetime_action.0.trigger.0.lifetime_percentage",
-													},
+													// ForceNew: true,
+													// ConflictsWith: []string{
+													// 	"certificate_policy.0.lifetime_action.0.trigger.0.lifetime_percentage",
+													// },
 												},
 												"lifetime_percentage": {
 													Type:     schema.TypeInt,
 													Optional: true,
-													ForceNew: true,
-													ConflictsWith: []string{
-														"certificate_policy.0.lifetime_action.0.trigger.0.days_before_expiry",
-													},
+													// ForceNew: true,
+													// ConflictsWith: []string{
+													// 	"certificate_policy.0.lifetime_action.0.trigger.0.days_before_expiry",
+													// },
 												},
 											},
 										},

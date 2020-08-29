@@ -338,6 +338,7 @@ func resourceArmKeyVaultKeyRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
+	d.Set("key_vault_id", *keyVaultId)
 	d.Set("name", id.Name)
 	if key := resp.Key; key != nil {
 		d.Set("key_type", string(key.Kty))
