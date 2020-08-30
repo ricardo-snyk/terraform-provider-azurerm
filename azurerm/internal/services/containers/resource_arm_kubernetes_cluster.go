@@ -117,9 +117,9 @@ func resourceArmKubernetesCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"client_id": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringIsNotEmpty,
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringIsNotEmpty,
 						},
 
 						"client_secret": {
@@ -165,9 +165,9 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(containerservice.SystemAssigned),
-							}, false),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(containerservice.SystemAssigned),
+							// }, false),
 						},
 						"principal_id": {
 							Type:     schema.TypeString,
@@ -188,10 +188,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"admin_username": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validate.KubernetesAdminUserName,
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							// ValidateFunc: validate.KubernetesAdminUserName,
 						},
 						"ssh_key": {
 							Type:     schema.TypeList,
@@ -202,10 +202,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key_data": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringIsNotEmpty,
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+										// ValidateFunc: validation.StringIsNotEmpty,
 									},
 								},
 							},
@@ -226,10 +226,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(containerservice.Azure),
-								string(containerservice.Kubenet),
-							}, false),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(containerservice.Azure),
+							// 	string(containerservice.Kubenet),
+							// }, false),
 						},
 
 						"network_policy": {
@@ -237,10 +237,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(containerservice.NetworkPolicyCalico),
-								string(containerservice.NetworkPolicyAzure),
-							}, false),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(containerservice.NetworkPolicyCalico),
+							// 	string(containerservice.NetworkPolicyAzure),
+							// }, false),
 						},
 
 						"dns_service_ip": {
@@ -281,10 +281,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							Default:  string(containerservice.Standard),
 							ForceNew: true,
 							// TODO: fix the casing in the Swagger
-							ValidateFunc: validation.StringInSlice([]string{
-								string(containerservice.Basic),
-								string(containerservice.Standard),
-							}, true),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(containerservice.Basic),
+							// 	string(containerservice.Standard),
+							// }, true),
 							DiffSuppressFunc: suppress.CaseDifference,
 						},
 						"load_balancer_profile": {
@@ -417,10 +417,10 @@ func resourceArmKubernetesCluster() *schema.Resource {
 							ForceNew: true,
 						},
 						"admin_password": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Sensitive:    true,
-							ValidateFunc: validation.StringIsNotEmpty,
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
+							// ValidateFunc: validation.StringIsNotEmpty,
 						},
 					},
 				},
@@ -1108,9 +1108,11 @@ func flattenKubernetesClusterWindowsProfile(profile *containerservice.ManagedClu
 
 	// admin password isn't returned, so let's look it up
 	adminPassword := ""
-	if v, ok := d.GetOk("windows_profile.0.admin_password"); ok {
-		adminPassword = v.(string)
-	}
+
+	// Fugue: don't capture secrets
+	// if v, ok := d.GetOk("windows_profile.0.admin_password"); ok {
+	// 	adminPassword = v.(string)
+	// }
 
 	return []interface{}{
 		map[string]interface{}{

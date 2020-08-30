@@ -5,9 +5,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2019-10-01/containerservice"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/validate"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
@@ -20,28 +17,28 @@ func SchemaDefaultNodePool() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				// Required
 				"name": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ForceNew:     true,
-					ValidateFunc: validate.KubernetesAgentPoolName,
+					Type:     schema.TypeString,
+					Required: true,
+					// ForceNew: true,
+					// ValidateFunc: validate.KubernetesAgentPoolName,
 				},
 
 				"type": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ForceNew: true,
-					Default:  string(containerservice.VirtualMachineScaleSets),
-					ValidateFunc: validation.StringInSlice([]string{
-						string(containerservice.AvailabilitySet),
-						string(containerservice.VirtualMachineScaleSets),
-					}, false),
+					// ForceNew: true,
+					Default: string(containerservice.VirtualMachineScaleSets),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(containerservice.AvailabilitySet),
+					// 	string(containerservice.VirtualMachineScaleSets),
+					// }, false),
 				},
 
 				"vm_size": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ForceNew:     true,
-					ValidateFunc: validation.StringIsNotEmpty,
+					Type:     schema.TypeString,
+					Required: true,
+					// ForceNew: true,
+					// ValidateFunc: validation.StringIsNotEmpty,
 				},
 
 				// Optional
@@ -61,33 +58,33 @@ func SchemaDefaultNodePool() *schema.Schema {
 				"enable_node_public_ip": {
 					Type:     schema.TypeBool,
 					Optional: true,
-					ForceNew: true,
+					// ForceNew: true,
 				},
 
 				"max_count": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 100),
+					Type:     schema.TypeInt,
+					Optional: true,
+					// ValidateFunc: validation.IntBetween(1, 100),
 				},
 
 				"max_pods": {
 					Type:     schema.TypeInt,
 					Optional: true,
 					Computed: true,
-					ForceNew: true,
+					// ForceNew: true,
 				},
 
 				"min_count": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 100),
+					Type:     schema.TypeInt,
+					Optional: true,
+					// ValidateFunc: validation.IntBetween(1, 100),
 				},
 
 				"node_count": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					Computed:     true,
-					ValidateFunc: validation.IntBetween(1, 100),
+					Type:     schema.TypeInt,
+					Optional: true,
+					Computed: true,
+					// ValidateFunc: validation.IntBetween(1, 100),
 				},
 
 				"node_taints": {
@@ -97,18 +94,18 @@ func SchemaDefaultNodePool() *schema.Schema {
 				},
 
 				"os_disk_size_gb": {
-					Type:         schema.TypeInt,
-					Optional:     true,
-					ForceNew:     true,
-					Computed:     true,
-					ValidateFunc: validation.IntAtLeast(1),
+					Type:     schema.TypeInt,
+					Optional: true,
+					// ForceNew: true,
+					Computed: true,
+					// ValidateFunc: validation.IntAtLeast(1),
 				},
 
 				"vnet_subnet_id": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ForceNew:     true,
-					ValidateFunc: azure.ValidateResourceID,
+					Type:     schema.TypeString,
+					Optional: true,
+					// ForceNew: true,
+					// ValidateFunc: azure.ValidateResourceID,
 				},
 			},
 		},

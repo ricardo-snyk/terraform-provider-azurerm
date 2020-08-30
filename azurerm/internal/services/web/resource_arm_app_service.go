@@ -91,7 +91,7 @@ func resourceArmAppService() *schema.Resource {
 			"app_settings": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -102,7 +102,7 @@ func resourceArmAppService() *schema.Resource {
 			"connection_string": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -141,7 +141,7 @@ func resourceArmAppService() *schema.Resource {
 			"site_credential": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
