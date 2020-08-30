@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/features"
@@ -132,7 +133,14 @@ func resourceArmSecurityCenterContactRead(d *schema.ResourceData, meta interface
 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
-	name := securityCenterContactName
+	id, err := azure.ParseAzureResourceID(d.Id())
+	if err != nil {
+		return fmt.Errorf("Invalid Security Center Contact ID %q: %+v", d.Id(), err)
+	}
+	name, ok := id.Path["securityContact"]
+	if !ok {
+		return fmt.Errorf("Could not find securityContact in ID: %q", d.Id())
+	}
 
 	resp, err := client.Get(ctx, name)
 	if err != nil {
