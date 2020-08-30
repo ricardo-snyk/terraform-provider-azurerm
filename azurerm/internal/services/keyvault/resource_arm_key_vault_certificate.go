@@ -468,6 +468,7 @@ func resourceArmKeyVaultCertificateRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error reading Key Vault Certificate: %+v", err)
 	}
 
+	d.Set("key_vault_id", *keyVaultId)
 	d.Set("name", id.Name)
 
 	certificatePolicy := flattenKeyVaultCertificatePolicy(cert.Policy)
