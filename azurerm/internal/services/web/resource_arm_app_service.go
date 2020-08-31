@@ -547,7 +547,7 @@ func resourceArmAppServiceRead(d *schema.ResourceData, meta interface{}) error {
 		// `Kind` values are like "functionapp", "app", or "app,container,xenon"
 		kindSegments := strings.Split(*resp.Kind, ",")
 		if kindSegments[0] != "app" {
-			fmt.Println("AppService removing non-app:", d.Id(), kindSegments)
+			log.Printf("[DEBUG] AppService removing non-app: %s %v", d.Id(), kindSegments)
 			d.SetId("")
 			return nil
 		}
