@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2019-08-01/web"
@@ -536,6 +537,20 @@ func resourceArmAppServiceRead(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 		return fmt.Errorf("Error making Read request on AzureRM App Service Configuration %q: %+v", name, err)
+	}
+
+	// Function apps are easily confused with app services since they are both
+	// under Microsoft.Web/sites. Confirm whether the "kind" is "app" and if it
+	// is not then trigger the removal of this resource from the state file by
+	// clearing the ID.
+	if resp.Kind != nil {
+		// `Kind` values are like "functionapp", "app", or "app,container,xenon"
+		kindSegments := strings.Split(*resp.Kind, ",")
+		if kindSegments[0] != "app" {
+			fmt.Println("AppService removing non-app:", d.Id(), kindSegments)
+			d.SetId("")
+			return nil
+		}
 	}
 
 	logsResp, err := client.GetDiagnosticLogsConfiguration(ctx, resGroup, name)

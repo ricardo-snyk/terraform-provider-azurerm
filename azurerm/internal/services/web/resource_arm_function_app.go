@@ -514,6 +514,21 @@ func resourceArmFunctionAppRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error making Read request on AzureRM Function App %q: %+v", name, err)
 	}
 
+	configResp, err := client.GetConfiguration(ctx, resGroup, name)
+	if err != nil {
+		return fmt.Errorf("Error making Read request on AzureRM Function App Configuration %q: %+v", name, err)
+	}
+
+	if resp.Kind != nil {
+		// `Kind` values are like "functionapp", "app", or "app,container,xenon"
+		kindSegments := strings.Split(*resp.Kind, ",")
+		if kindSegments[0] != "functionapp" {
+			log.Printf("[DEBUG] FunctionApp removing non-func: %s %v", d.Id(), kindSegments)
+			d.SetId("")
+			return nil
+		}
+	}
+
 	d.Set("name", name)
 	d.Set("resource_group_name", resGroup)
 	d.Set("kind", resp.Kind)
@@ -616,11 +631,6 @@ func resourceArmFunctionAppRead(d *schema.ResourceData, meta interface{}) error 
 	identity := azure.FlattenAppServiceIdentity(resp.Identity)
 	if err := d.Set("identity", identity); err != nil {
 		return fmt.Errorf("Error setting `identity`: %s", err)
-	}
-
-	configResp, err := client.GetConfiguration(ctx, resGroup, name)
-	if err != nil {
-		return fmt.Errorf("Error making Read request on AzureRM Function App Configuration %q: %+v", name, err)
 	}
 
 	siteConfig := flattenFunctionAppSiteConfig(configResp.SiteConfig)
