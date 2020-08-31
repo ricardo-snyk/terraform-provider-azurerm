@@ -77,9 +77,10 @@ func resourceArmFunctionApp() *schema.Resource {
 			},
 
 			"storage_connection_string": {
-				Type:      schema.TypeString,
-				Required:  true,
-				ForceNew:  true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// Required:  true,
+				// ForceNew:  true,
 				Sensitive: true,
 			},
 
@@ -100,7 +101,7 @@ func resourceArmFunctionApp() *schema.Resource {
 			"connection_string": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -115,19 +116,19 @@ func resourceArmFunctionApp() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(web.APIHub),
-								string(web.Custom),
-								string(web.DocDb),
-								string(web.EventHub),
-								string(web.MySQL),
-								string(web.NotificationHub),
-								string(web.PostgreSQL),
-								string(web.RedisCache),
-								string(web.ServiceBus),
-								string(web.SQLAzure),
-								string(web.SQLServer),
-							}, true),
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	string(web.APIHub),
+							// 	string(web.Custom),
+							// 	string(web.DocDb),
+							// 	string(web.EventHub),
+							// 	string(web.MySQL),
+							// 	string(web.NotificationHub),
+							// 	string(web.PostgreSQL),
+							// 	string(web.RedisCache),
+							// 	string(web.ServiceBus),
+							// 	string(web.SQLAzure),
+							// 	string(web.SQLServer),
+							// }, true),
 							DiffSuppressFunc: suppress.CaseDifference,
 						},
 					},
@@ -246,7 +247,8 @@ func resourceArmFunctionApp() *schema.Resource {
 
 			"site_credential": {
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
+				// Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"username": {
@@ -512,36 +514,19 @@ func resourceArmFunctionAppRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error making Read request on AzureRM Function App %q: %+v", name, err)
 	}
 
-	appSettingsResp, err := client.ListApplicationSettings(ctx, resGroup, name)
+	configResp, err := client.GetConfiguration(ctx, resGroup, name)
 	if err != nil {
-		if utils.ResponseWasNotFound(appSettingsResp.Response) {
-			log.Printf("[DEBUG] Application Settings of Function App %q (resource group %q) were not found", name, resGroup)
+		return fmt.Errorf("Error making Read request on AzureRM Function App Configuration %q: %+v", name, err)
+	}
+
+	if resp.Kind != nil {
+		// `Kind` values are like "functionapp", "app", or "app,container,xenon"
+		kindSegments := strings.Split(*resp.Kind, ",")
+		if kindSegments[0] != "functionapp" {
+			log.Printf("[DEBUG] FunctionApp removing non-func: %s %v", d.Id(), kindSegments)
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("Error making Read request on AzureRM Function App AppSettings %q: %+v", name, err)
-	}
-
-	connectionStringsResp, err := client.ListConnectionStrings(ctx, resGroup, name)
-	if err != nil {
-		return fmt.Errorf("Error making Read request on AzureRM Function App ConnectionStrings %q: %+v", name, err)
-	}
-
-	siteCredFuture, err := client.ListPublishingCredentials(ctx, resGroup, name)
-	if err != nil {
-		return err
-	}
-	err = siteCredFuture.WaitForCompletionRef(ctx, client.Client)
-	if err != nil {
-		return err
-	}
-	siteCredResp, err := siteCredFuture.Result(*client)
-	if err != nil {
-		return fmt.Errorf("Error making Read request on AzureRM App Service Site Credential %q: %+v", name, err)
-	}
-	authResp, err := client.GetAuthSettings(ctx, resGroup, name)
-	if err != nil {
-		return fmt.Errorf("Error retrieving the AuthSettings for Function App %q (Resource Group %q): %+v", name, resGroup, err)
 	}
 
 	d.Set("name", name)
@@ -562,25 +547,85 @@ func resourceArmFunctionAppRead(d *schema.ResourceData, meta interface{}) error 
 		d.Set("client_affinity_enabled", props.ClientAffinityEnabled)
 	}
 
-	appSettings := flattenAppServiceAppSettings(appSettingsResp.Properties)
+	// Consider an error here a soft failure on 403 forbidden, which happens with Reader permissions
+	appSettingsResp, err := client.ListApplicationSettings(ctx, resGroup, name)
+	if err != nil {
+		if utils.ResponseWasStatusCode(appSettingsResp.Response, 403) {
+			log.Printf("[WARNING] Forbidden to retrieve Function App application settings %q (Resource Group %q): %+v", name, resGroup, err)
+		} else if !utils.ResponseWasNotFound(appSettingsResp.Response) {
+			return fmt.Errorf("Error reading Function App AppSettings %q: %+v", name, err)
+		}
+	} else {
+		appSettings := flattenAppServiceAppSettings(appSettingsResp.Properties)
 
-	d.Set("storage_connection_string", appSettings["AzureWebJobsStorage"])
-	d.Set("version", appSettings["FUNCTIONS_EXTENSION_VERSION"])
+		d.Set("storage_connection_string", appSettings["AzureWebJobsStorage"])
+		d.Set("version", appSettings["FUNCTIONS_EXTENSION_VERSION"])
 
-	dashboard, ok := appSettings["AzureWebJobsDashboard"]
-	d.Set("enable_builtin_logging", ok && dashboard != "")
+		dashboard, ok := appSettings["AzureWebJobsDashboard"]
+		d.Set("enable_builtin_logging", ok && dashboard != "")
 
-	delete(appSettings, "AzureWebJobsDashboard")
-	delete(appSettings, "AzureWebJobsStorage")
-	delete(appSettings, "FUNCTIONS_EXTENSION_VERSION")
-	delete(appSettings, "WEBSITE_CONTENTSHARE")
-	delete(appSettings, "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING")
+		delete(appSettings, "AzureWebJobsDashboard")
+		delete(appSettings, "AzureWebJobsStorage")
+		delete(appSettings, "FUNCTIONS_EXTENSION_VERSION")
+		delete(appSettings, "WEBSITE_CONTENTSHARE")
+		delete(appSettings, "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING")
 
-	if err = d.Set("app_settings", appSettings); err != nil {
-		return err
+		if err = d.Set("app_settings", appSettings); err != nil {
+			return err
+		}
 	}
-	if err = d.Set("connection_string", flattenFunctionAppConnectionStrings(connectionStringsResp.Properties)); err != nil {
-		return err
+
+	// Consider an error here a soft failure on 403 forbidden, which happens with Reader permissions
+	connectionStringsResp, err := client.ListConnectionStrings(ctx, resGroup, name)
+	if err != nil {
+		if utils.ResponseWasStatusCode(appSettingsResp.Response, 403) {
+			log.Printf("[WARNING] Forbidden to retrieve Function App connection strings %q (Resource Group %q): %+v", name, resGroup, err)
+		} else {
+			return fmt.Errorf("Error making Read request on AzureRM Function App ConnectionStrings %q: %+v", name, err)
+		}
+	} else {
+		connString := flattenFunctionAppConnectionStrings(connectionStringsResp.Properties)
+		if err = d.Set("connection_string", connString); err != nil {
+			return err
+		}
+	}
+
+	// Consider an error here a soft failure on 403 forbidden, which happens with Reader permissions
+	siteCredFuture, err := client.ListPublishingCredentials(ctx, resGroup, name)
+	if err != nil {
+		if utils.ResponseWasStatusCode(appSettingsResp.Response, 403) {
+			log.Printf("[WARNING] Forbidden to retrieve Function App publishing credentials %q (Resource Group %q): %+v", name, resGroup, err)
+		} else {
+			return err
+		}
+	} else {
+		err = siteCredFuture.WaitForCompletionRef(ctx, client.Client)
+		if err != nil {
+			return err
+		}
+		siteCredResp, err := siteCredFuture.Result(*client)
+		if err != nil {
+			return fmt.Errorf("Error making Read request on AzureRM App Service Site Credential %q: %+v", name, err)
+		}
+		siteCred := flattenFunctionAppSiteCredential(siteCredResp.UserProperties)
+		if err = d.Set("site_credential", siteCred); err != nil {
+			return err
+		}
+	}
+
+	// Consider an error here a soft failure on 403 forbidden, which happens with Reader permissions
+	authResp, err := client.GetAuthSettings(ctx, resGroup, name)
+	if err != nil {
+		if utils.ResponseWasStatusCode(authResp.Response, 403) {
+			log.Printf("[WARNING] Forbidden to retrieve Function App auth settings: %q (Resource Group %q): %+v", name, resGroup, err)
+		} else if !utils.ResponseWasNotFound(authResp.Response) {
+			return fmt.Errorf("Error retrieving auth settings for Function App %q (Resource Group %q): %+v", name, resGroup, err)
+		}
+	} else {
+		authSettings := azure.FlattenAppServiceAuthSettings(authResp.SiteAuthSettingsProperties)
+		if err := d.Set("auth_settings", authSettings); err != nil {
+			return fmt.Errorf("Error setting `auth_settings`: %s", err)
+		}
 	}
 
 	identity := azure.FlattenAppServiceIdentity(resp.Identity)
@@ -588,23 +633,8 @@ func resourceArmFunctionAppRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error setting `identity`: %s", err)
 	}
 
-	configResp, err := client.GetConfiguration(ctx, resGroup, name)
-	if err != nil {
-		return fmt.Errorf("Error making Read request on AzureRM Function App Configuration %q: %+v", name, err)
-	}
-
 	siteConfig := flattenFunctionAppSiteConfig(configResp.SiteConfig)
 	if err = d.Set("site_config", siteConfig); err != nil {
-		return err
-	}
-
-	authSettings := azure.FlattenAppServiceAuthSettings(authResp.SiteAuthSettingsProperties)
-	if err := d.Set("auth_settings", authSettings); err != nil {
-		return fmt.Errorf("Error setting `auth_settings`: %s", err)
-	}
-
-	siteCred := flattenFunctionAppSiteCredential(siteCredResp.UserProperties)
-	if err = d.Set("site_credential", siteCred); err != nil {
 		return err
 	}
 

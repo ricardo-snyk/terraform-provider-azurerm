@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-09-01/network"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/acceptance"
@@ -297,7 +296,7 @@ func testAccAzureRMNetworkWatcherFlowLog_version(t *testing.T) {
 
 func testCheckAzureRMNetworkWatcherFlowLogExists(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := acceptance.AzureProvider.Meta().(*clients.Client).Network.WatcherClient
+		client := acceptance.AzureProvider.Meta().(*clients.Client).Network.FlowLogsClient
 		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 
 		// Ensure we have enough information in state to look up in API
@@ -311,20 +310,9 @@ func testCheckAzureRMNetworkWatcherFlowLogExists(name string) resource.TestCheck
 			return err
 		}
 
-		statusParameters := network.FlowLogStatusParameters{
-			TargetResourceID: &id.NetworkSecurityGroupID,
-		}
-		future, err := client.GetFlowLogStatus(ctx, id.ResourceGroup, id.NetworkWatcherName, statusParameters)
+		_, err = client.Get(ctx, id.ResourceGroup, id.NetworkWatcherName, id.FlowLogName)
 		if err != nil {
-			return fmt.Errorf("Error retrieving Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-		}
-
-		if err := future.WaitForCompletionRef(ctx, client.Client); err != nil {
-			return fmt.Errorf("Error waiting for retrieval of Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-		}
-
-		if _, err := future.Result(*client); err != nil {
-			return fmt.Errorf("Error retrieving of Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
+			return fmt.Errorf("Error retrieving Flow Log Configuration for %q (Network Watcher %q / Resource Group %q): %+v", id.FlowLogName, id.NetworkWatcherName, id.ResourceGroup, err)
 		}
 
 		return nil

@@ -56,18 +56,18 @@ func resourceArmAppServicePlan() *schema.Resource {
 				Optional: true,
 				Default:  "Windows",
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					// @tombuildsstuff: I believe `app` is the older representation of `Windows`
-					// thus we need to support it to be able to import resources without recreating them.
-					// @jcorioland: new SKU and kind 'xenon' have been added for Windows Containers support
-					// https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-windows-container-support-in-azure-app-service/
-					"App",
-					"elastic",
-					"FunctionApp",
-					"Linux",
-					"Windows",
-					"xenon",
-				}, true),
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	// @tombuildsstuff: I believe `app` is the older representation of `Windows`
+				// 	// thus we need to support it to be able to import resources without recreating them.
+				// 	// @jcorioland: new SKU and kind 'xenon' have been added for Windows Containers support
+				// 	// https://azure.microsoft.com/en-us/blog/announcing-the-public-preview-of-windows-container-support-in-azure-app-service/
+				// 	"App",
+				// 	"elastic",
+				// 	"FunctionApp",
+				// 	"Linux",
+				// 	"Windows",
+				// 	"xenon",
+				// }, true),
 				DiffSuppressFunc: suppress.CaseDifference,
 			},
 

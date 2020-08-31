@@ -48,8 +48,7 @@ func resourceArmRoleDefinition() *schema.Resource {
 
 			"scope": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Optional: true,
 			},
 
 			"description": {

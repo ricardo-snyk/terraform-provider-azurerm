@@ -2,12 +2,9 @@ package network
 
 import (
 	"fmt"
-	"log"
-	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-09-01/network"
-	"github.com/hashicorp/go-azure-helpers/response"
+	networkNew "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-11-01/network"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
@@ -18,30 +15,29 @@ import (
 
 type NetworkWatcherFlowLogAccountID struct {
 	azure.ResourceID
-	NetworkWatcherName     string
-	NetworkSecurityGroupID string
+	NetworkWatcherName string
+	FlowLogName        string
 }
 
 func ParseNetworkWatcherFlowLogID(id string) (*NetworkWatcherFlowLogAccountID, error) {
-	parts := strings.Split(id, "/networkSecurityGroupId")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("Error: Network Watcher Flow Log ID could not be split on `/networkSecurityGroupId`: %s", id)
-	}
 
-	watcherId, err := azure.ParseAzureResourceID(parts[0])
+	flowLogID, err := azure.ParseAzureResourceID(id)
 	if err != nil {
 		return nil, err
 	}
-
-	watcherName, ok := watcherId.Path["networkWatchers"]
+	watcherName, ok := flowLogID.Path["networkWatchers"]
 	if !ok {
-		return nil, fmt.Errorf("Error: Unable to parse Network Watcher Flow Log ID: networkWatchers is missing from: %s", id)
+		return nil, fmt.Errorf("Error: Watcher name not found in Flow Log ID: %s", id)
+	}
+	flowLogName, ok := flowLogID.Path["flowLogs"]
+	if !ok {
+		return nil, fmt.Errorf("Error: Flow Log name not found in Flow Log ID: %s", id)
 	}
 
 	return &NetworkWatcherFlowLogAccountID{
-		ResourceID:             *watcherId,
-		NetworkWatcherName:     watcherName,
-		NetworkSecurityGroupID: parts[1],
+		ResourceID:         *flowLogID,
+		NetworkWatcherName: watcherName,
+		FlowLogName:        flowLogName,
 	}, nil
 }
 
@@ -168,8 +164,8 @@ func azureRMSuppressFlowLogRetentionPolicyDaysDiff(k, old, new string, d *schema
 }
 
 func resourceArmNetworkWatcherFlowLogCreateUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).Network.WatcherClient
-	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
+	flowLogsClient := meta.(*clients.Client).Network.FlowLogsClient
+	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	networkWatcherName := d.Get("network_watcher_name").(string)
@@ -178,12 +174,12 @@ func resourceArmNetworkWatcherFlowLogCreateUpdate(d *schema.ResourceData, meta i
 	storageAccountID := d.Get("storage_account_id").(string)
 	enabled := d.Get("enabled").(bool)
 
-	parameters := network.FlowLogInformation{
-		TargetResourceID: &networkSecurityGroupID,
-		FlowLogProperties: &network.FlowLogProperties{
-			StorageID:       &storageAccountID,
-			Enabled:         &enabled,
-			RetentionPolicy: expandAzureRmNetworkWatcherFlowLogRetentionPolicy(d),
+	parameters := networkNew.FlowLog{
+		FlowLogPropertiesFormat: &networkNew.FlowLogPropertiesFormat{
+			StorageID:        &storageAccountID,
+			Enabled:          &enabled,
+			TargetResourceID: &networkSecurityGroupID,
+			RetentionPolicy:  expandAzureRmNetworkWatcherFlowLogRetentionPolicy(d),
 		},
 	}
 
@@ -192,37 +188,37 @@ func resourceArmNetworkWatcherFlowLogCreateUpdate(d *schema.ResourceData, meta i
 	}
 
 	if version, ok := d.GetOk("version"); ok {
-		format := &network.FlowLogFormatParameters{
+		format := &networkNew.FlowLogFormatParameters{
 			Version: utils.Int32(int32(version.(int))),
 		}
 
-		parameters.FlowLogProperties.Format = format
+		parameters.FlowLogPropertiesFormat.Format = format
 	}
 
-	future, err := client.SetFlowLogConfiguration(ctx, resourceGroupName, networkWatcherName, parameters)
+	future, err := flowLogsClient.CreateOrUpdate(ctx, resourceGroupName, networkWatcherName, networkSecurityGroupID, parameters)
 	if err != nil {
-		return fmt.Errorf("Error setting Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", networkSecurityGroupID, networkWatcherName, resourceGroupName, err)
+		return fmt.Errorf("Error creating or updating Flow Log on Watcher %q: %+v", networkWatcherName, err)
 	}
 
-	if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+	if err = future.WaitForCompletionRef(ctx, flowLogsClient.Client); err != nil {
 		return fmt.Errorf("Error waiting for completion of setting Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", networkSecurityGroupID, networkWatcherName, resourceGroupName, err)
 	}
 
-	resp, err := client.Get(ctx, resourceGroupName, networkWatcherName)
+	resp, err := flowLogsClient.Get(ctx, resourceGroupName, networkWatcherName, networkSecurityGroupID)
 	if err != nil {
 		return fmt.Errorf("Cannot read Network Watcher %q (Resource Group %q) err: %+v", networkWatcherName, resourceGroupName, err)
 	}
 	if resp.ID == nil {
-		return fmt.Errorf("Network Watcher %q is nil (Resource Group %q)", networkWatcherName, resourceGroupName)
+		return fmt.Errorf("Flow Log %q is nil (Resource Group %q)", networkWatcherName, resourceGroupName)
 	}
 
-	d.SetId(*resp.ID + "/networkSecurityGroupId" + networkSecurityGroupID)
+	d.SetId(*resp.ID)
 
 	return resourceArmNetworkWatcherFlowLogRead(d, meta)
 }
 
 func resourceArmNetworkWatcherFlowLogRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).Network.WatcherClient
+	flowLogsClient := meta.(*clients.Client).Network.FlowLogsClient
 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
@@ -231,41 +227,26 @@ func resourceArmNetworkWatcherFlowLogRead(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	// Get current flow log status
-	statusParameters := network.FlowLogStatusParameters{
-		TargetResourceID: &id.NetworkSecurityGroupID,
-	}
-
-	future, err := client.GetFlowLogStatus(ctx, id.ResourceGroup, id.NetworkWatcherName, statusParameters)
+	resp, err := flowLogsClient.Get(ctx, id.ResourceGroup, id.NetworkWatcherName, id.FlowLogName)
 	if err != nil {
-		if !response.WasNotFound(future.Response()) {
-			// One of storage account, NSG, or flow log is missing
-			log.Printf("[INFO] Error getting Flow Log Configuration %q for target %q - removing from state", d.Id(), id.NetworkSecurityGroupID)
+		if utils.ResponseWasNotFound(resp.Response) {
 			d.SetId("")
 			return nil
 		}
-
-		return fmt.Errorf("Error retrieving Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-	}
-
-	if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-		return fmt.Errorf("Error waiting for retrieval of Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-	}
-
-	fli, err := future.Result(*client)
-	if err != nil {
-		return fmt.Errorf("Error retrieving Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
+		return fmt.Errorf("Error retrieving Flow Log %q (Resource Group %q): %+v",
+			d.Id(), id.ResourceGroup, err)
 	}
 
 	d.Set("network_watcher_name", id.NetworkWatcherName)
 	d.Set("resource_group_name", id.ResourceGroup)
+	d.Set("network_security_group_id", resp.TargetResourceID)
 
-	d.Set("network_security_group_id", fli.TargetResourceID)
-	if err := d.Set("traffic_analytics", flattenAzureRmNetworkWatcherFlowLogTrafficAnalytics(fli.FlowAnalyticsConfiguration)); err != nil {
+	flowAnalytics := flattenAzureRmNetworkWatcherFlowLogTrafficAnalytics(resp.FlowAnalyticsConfiguration)
+	if err := d.Set("traffic_analytics", flowAnalytics); err != nil {
 		return fmt.Errorf("Error setting `traffic_analytics`: %+v", err)
 	}
 
-	if props := fli.FlowLogProperties; props != nil {
+	if props := resp.FlowLogPropertiesFormat; props != nil {
 		d.Set("enabled", props.Enabled)
 
 		if format := props.Format; format != nil {
@@ -287,7 +268,7 @@ func resourceArmNetworkWatcherFlowLogRead(d *schema.ResourceData, meta interface
 }
 
 func resourceArmNetworkWatcherFlowLogDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).Network.WatcherClient
+	flowLogsClient := meta.(*clients.Client).Network.FlowLogsClient
 	ctx, cancel := timeouts.ForDelete(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
@@ -296,36 +277,24 @@ func resourceArmNetworkWatcherFlowLogDelete(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	// Get current flow log status
-	statusParameters := network.FlowLogStatusParameters{
-		TargetResourceID: &id.NetworkSecurityGroupID,
-	}
-	future, err := client.GetFlowLogStatus(ctx, id.ResourceGroup, id.NetworkWatcherName, statusParameters)
+	resp, err := flowLogsClient.Get(ctx, id.ResourceGroup, id.NetworkWatcherName, id.FlowLogName)
 	if err != nil {
-		return fmt.Errorf("Error getting Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
+		if utils.ResponseWasNotFound(resp.Response) {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("Error retrieving Flow Log %q (Resource Group %q): %+v",
+			d.Id(), id.ResourceGroup, err)
 	}
 
-	if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-		return fmt.Errorf("Error waiting for retrieval of Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-	}
-
-	fli, err := future.Result(*client)
-	if err != nil {
-		return fmt.Errorf("Error retrieving Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
-	}
-
-	// There is no delete in Azure API. Disabling flow log is effectively a delete in Terraform.
-	if props := fli.FlowLogProperties; props != nil {
+	if props := resp.FlowLogPropertiesFormat; props != nil {
 		if props.Enabled != nil && *props.Enabled {
-			props.Enabled = utils.Bool(false)
-
-			setFuture, err := client.SetFlowLogConfiguration(ctx, id.ResourceGroup, id.NetworkWatcherName, fli)
+			delFuture, err := flowLogsClient.Delete(ctx, id.ResourceGroup, id.NetworkWatcherName, id.FlowLogName)
 			if err != nil {
-				return fmt.Errorf("Error disabling Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
+				return fmt.Errorf("Error deleting Flow Log %q: %+v", d.Id(), err)
 			}
-
-			if err = setFuture.WaitForCompletionRef(ctx, client.Client); err != nil {
-				return fmt.Errorf("Error waiting for completion of disabling Flow Log Configuration for target %q (Network Watcher %q / Resource Group %q): %+v", id.NetworkSecurityGroupID, id.NetworkWatcherName, id.ResourceGroup, err)
+			if err = delFuture.WaitForCompletionRef(ctx, flowLogsClient.Client); err != nil {
+				return fmt.Errorf("Error waiting for completion of Flow Log deletion %q: %+v", d.Id(), err)
 			}
 		}
 	}
@@ -333,7 +302,7 @@ func resourceArmNetworkWatcherFlowLogDelete(d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func expandAzureRmNetworkWatcherFlowLogRetentionPolicy(d *schema.ResourceData) *network.RetentionPolicyParameters {
+func expandAzureRmNetworkWatcherFlowLogRetentionPolicy(d *schema.ResourceData) *networkNew.RetentionPolicyParameters {
 	vs := d.Get("retention_policy").([]interface{})
 	if len(vs) < 1 || vs[0] == nil {
 		return nil
@@ -343,13 +312,13 @@ func expandAzureRmNetworkWatcherFlowLogRetentionPolicy(d *schema.ResourceData) *
 	enabled := v["enabled"].(bool)
 	days := v["days"].(int)
 
-	return &network.RetentionPolicyParameters{
+	return &networkNew.RetentionPolicyParameters{
 		Enabled: utils.Bool(enabled),
 		Days:    utils.Int32(int32(days)),
 	}
 }
 
-func flattenAzureRmNetworkWatcherFlowLogRetentionPolicy(input *network.RetentionPolicyParameters) []interface{} {
+func flattenAzureRmNetworkWatcherFlowLogRetentionPolicy(input *networkNew.RetentionPolicyParameters) []interface{} {
 	if input == nil {
 		return []interface{}{}
 	}
@@ -366,7 +335,7 @@ func flattenAzureRmNetworkWatcherFlowLogRetentionPolicy(input *network.Retention
 	return []interface{}{result}
 }
 
-func flattenAzureRmNetworkWatcherFlowLogTrafficAnalytics(input *network.TrafficAnalyticsProperties) []interface{} {
+func flattenAzureRmNetworkWatcherFlowLogTrafficAnalytics(input *networkNew.TrafficAnalyticsProperties) []interface{} {
 	if input == nil || input.NetworkWatcherFlowAnalyticsConfiguration == nil {
 		return []interface{}{}
 	}
@@ -391,7 +360,7 @@ func flattenAzureRmNetworkWatcherFlowLogTrafficAnalytics(input *network.TrafficA
 	return []interface{}{result}
 }
 
-func expandAzureRmNetworkWatcherFlowLogTrafficAnalytics(d *schema.ResourceData) *network.TrafficAnalyticsProperties {
+func expandAzureRmNetworkWatcherFlowLogTrafficAnalytics(d *schema.ResourceData) *networkNew.TrafficAnalyticsProperties {
 	vs := d.Get("traffic_analytics").([]interface{})
 
 	v := vs[0].(map[string]interface{})
@@ -400,8 +369,8 @@ func expandAzureRmNetworkWatcherFlowLogTrafficAnalytics(d *schema.ResourceData) 
 	workspaceRegion := v["workspace_region"].(string)
 	workspaceResourceID := v["workspace_resource_id"].(string)
 
-	return &network.TrafficAnalyticsProperties{
-		NetworkWatcherFlowAnalyticsConfiguration: &network.TrafficAnalyticsConfigurationProperties{
+	return &networkNew.TrafficAnalyticsProperties{
+		NetworkWatcherFlowAnalyticsConfiguration: &networkNew.TrafficAnalyticsConfigurationProperties{
 			Enabled:             utils.Bool(enabled),
 			WorkspaceID:         utils.String(workspaceID),
 			WorkspaceRegion:     utils.String(workspaceRegion),

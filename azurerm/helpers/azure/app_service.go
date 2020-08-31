@@ -3,7 +3,6 @@ package azure
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2019-08-01/web"
@@ -58,7 +57,7 @@ func SchemaAppServiceFacebookAuthSettings() *schema.Schema {
 				},
 				"app_secret": {
 					Type:      schema.TypeString,
-					Required:  true,
+					Optional:  true,
 					Sensitive: true,
 				},
 				"oauth_scopes": {
@@ -84,7 +83,7 @@ func SchemaAppServiceGoogleAuthSettings() *schema.Schema {
 				},
 				"client_secret": {
 					Type:      schema.TypeString,
-					Required:  true,
+					Optional:  true,
 					Sensitive: true,
 				},
 				"oauth_scopes": {
@@ -110,7 +109,7 @@ func SchemaAppServiceMicrosoftAuthSettings() *schema.Schema {
 				},
 				"client_secret": {
 					Type:      schema.TypeString,
-					Required:  true,
+					Optional:  true,
 					Sensitive: true,
 				},
 				"oauth_scopes": {
@@ -136,7 +135,7 @@ func SchemaAppServiceTwitterAuthSettings() *schema.Schema {
 				},
 				"consumer_secret": {
 					Type:      schema.TypeString,
-					Required:  true,
+					Optional:  true,
 					Sensitive: true,
 				},
 			},
@@ -148,7 +147,7 @@ func SchemaAppServiceAuthSettings() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: true,
-		Computed: true,
+		// Computed: true,
 		MaxItems: 1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -171,13 +170,13 @@ func SchemaAppServiceAuthSettings() *schema.Schema {
 				"default_provider": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.AzureActiveDirectory),
-						string(web.Facebook),
-						string(web.Google),
-						string(web.MicrosoftAccount),
-						string(web.Twitter),
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.AzureActiveDirectory),
+					// 	string(web.Facebook),
+					// 	string(web.Google),
+					// 	string(web.MicrosoftAccount),
+					// 	string(web.Twitter),
+					// }, false),
 				},
 				"issuer": {
 					Type:         schema.TypeString,
@@ -201,10 +200,10 @@ func SchemaAppServiceAuthSettings() *schema.Schema {
 				"unauthenticated_client_action": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.AllowAnonymous),
-						string(web.RedirectToLoginPage),
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.AllowAnonymous),
+					// 	string(web.RedirectToLoginPage),
+					// }, false),
 				},
 				"active_directory": SchemaAppServiceAadAuthSettings(),
 				"facebook":         SchemaAppServiceFacebookAuthSettings(),
@@ -227,12 +226,12 @@ func SchemaAppServiceIdentity() *schema.Schema {
 				"type": {
 					Type:     schema.TypeString,
 					Required: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.ManagedServiceIdentityTypeNone),
-						string(web.ManagedServiceIdentityTypeSystemAssigned),
-						string(SystemAssignedUserAssigned),
-						string(web.ManagedServiceIdentityTypeUserAssigned),
-					}, true),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.ManagedServiceIdentityTypeNone),
+					// 	string(web.ManagedServiceIdentityTypeSystemAssigned),
+					// 	string(SystemAssignedUserAssigned),
+					// 	string(web.ManagedServiceIdentityTypeUserAssigned),
+					// }, true),
 					DiffSuppressFunc: suppress.CaseDifference,
 				},
 				"principal_id": {
@@ -286,10 +285,10 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Default:  "v4.0",
-					ValidateFunc: validation.StringInSlice([]string{
-						"v2.0",
-						"v4.0",
-					}, true),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	"v2.0",
+					// 	"v4.0",
+					// }, true),
 					DiffSuppressFunc: suppress.CaseDifference,
 				},
 
@@ -323,19 +322,19 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 				"java_version": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringMatch(
-						regexp.MustCompile(`^(1\.7|1\.8|11)`),
-						`Invalid Java version provided`),
+					// ValidateFunc: validation.StringMatch(
+					// 	regexp.MustCompile(`^(1\.7|1\.8|11)`),
+					// 	`Invalid Java version provided`),
 				},
 
 				"java_container": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						"JAVA",
-						"JETTY",
-						"TOMCAT",
-					}, true),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	"JAVA",
+					// 	"JETTY",
+					// 	"TOMCAT",
+					// }, true),
 					DiffSuppressFunc: suppress.CaseDifference,
 				},
 
@@ -354,33 +353,33 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.Classic),
-						string(web.Integrated),
-					}, true),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.Classic),
+					// 	string(web.Integrated),
+					// }, true),
 					DiffSuppressFunc: suppress.CaseDifference,
 				},
 
 				"php_version": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						"5.5",
-						"5.6",
-						"7.0",
-						"7.1",
-						"7.2",
-						"7.3",
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	"5.5",
+					// 	"5.6",
+					// 	"7.0",
+					// 	"7.1",
+					// 	"7.2",
+					// 	"7.3",
+					// }, false),
 				},
 
 				"python_version": {
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						"2.7",
-						"3.4",
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	"2.7",
+					// 	"3.4",
+					// }, false),
 				},
 
 				"remote_debugging_enabled": {
@@ -393,12 +392,12 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						"VS2012",
-						"VS2013",
-						"VS2015",
-						"VS2017",
-					}, true),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	"VS2012",
+					// 	"VS2013",
+					// 	"VS2015",
+					// 	"VS2017",
+					// }, true),
 					DiffSuppressFunc: suppress.CaseDifference,
 				},
 
@@ -406,25 +405,25 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Default:  string(web.ScmTypeNone),
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.ScmTypeBitbucketGit),
-						string(web.ScmTypeBitbucketHg),
-						string(web.ScmTypeCodePlexGit),
-						string(web.ScmTypeCodePlexHg),
-						string(web.ScmTypeDropbox),
-						string(web.ScmTypeExternalGit),
-						string(web.ScmTypeExternalHg),
-						string(web.ScmTypeGitHub),
-						string(web.ScmTypeLocalGit),
-						string(web.ScmTypeNone),
-						string(web.ScmTypeOneDrive),
-						string(web.ScmTypeTfs),
-						string(web.ScmTypeVSO),
-						// Not in the specs, but is set by Azure Pipelines
-						// https://github.com/Microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureRmWebAppDeploymentV4/operations/AzureAppServiceUtility.ts#L19
-						// upstream issue: https://github.com/Azure/azure-rest-api-specs/issues/5345
-						"VSTSRM",
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.ScmTypeBitbucketGit),
+					// 	string(web.ScmTypeBitbucketHg),
+					// 	string(web.ScmTypeCodePlexGit),
+					// 	string(web.ScmTypeCodePlexHg),
+					// 	string(web.ScmTypeDropbox),
+					// 	string(web.ScmTypeExternalGit),
+					// 	string(web.ScmTypeExternalHg),
+					// 	string(web.ScmTypeGitHub),
+					// 	string(web.ScmTypeLocalGit),
+					// 	string(web.ScmTypeNone),
+					// 	string(web.ScmTypeOneDrive),
+					// 	string(web.ScmTypeTfs),
+					// 	string(web.ScmTypeVSO),
+					// 	// Not in the specs, but is set by Azure Pipelines
+					// 	// https://github.com/Microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureRmWebAppDeploymentV4/operations/AzureAppServiceUtility.ts#L19
+					// 	// upstream issue: https://github.com/Azure/azure-rest-api-specs/issues/5345
+					// 	"VSTSRM",
+					// }, false),
 				},
 
 				"use_32_bit_worker_process": {
@@ -442,11 +441,11 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.AllAllowed),
-						string(web.Disabled),
-						string(web.FtpsOnly),
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.AllAllowed),
+					// 	string(web.Disabled),
+					// 	string(web.FtpsOnly),
+					// }, false),
 				},
 
 				"linux_fx_version": {
@@ -465,11 +464,11 @@ func SchemaAppServiceSiteConfig() *schema.Schema {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.OneFullStopZero),
-						string(web.OneFullStopOne),
-						string(web.OneFullStopTwo),
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.OneFullStopZero),
+					// 	string(web.OneFullStopOne),
+					// 	string(web.OneFullStopTwo),
+					// }, false),
 				},
 
 				"cors": SchemaWebCorsSettings(),
@@ -588,7 +587,7 @@ func SchemaAppServiceStorageAccounts() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
-		Computed: true,
+		// Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"name": {
@@ -600,10 +599,10 @@ func SchemaAppServiceStorageAccounts() *schema.Schema {
 				"type": {
 					Type:     schema.TypeString,
 					Required: true,
-					ValidateFunc: validation.StringInSlice([]string{
-						string(web.AzureBlob),
-						string(web.AzureFiles),
-					}, false),
+					// ValidateFunc: validation.StringInSlice([]string{
+					// 	string(web.AzureBlob),
+					// 	string(web.AzureFiles),
+					// }, false),
 				},
 
 				"account_name": {
@@ -618,12 +617,12 @@ func SchemaAppServiceStorageAccounts() *schema.Schema {
 					ValidateFunc: validation.StringIsNotEmpty,
 				},
 
-				"access_key": {
-					Type:         schema.TypeString,
-					Required:     true,
-					Sensitive:    true,
-					ValidateFunc: validation.StringIsNotEmpty,
-				},
+				// "access_key": {
+				// 	Type:         schema.TypeString,
+				// 	Optional:     true,
+				// 	Sensitive:    true,
+				// 	ValidateFunc: validation.StringIsNotEmpty,
+				// },
 
 				"mount_path": {
 					Type:     schema.TypeString,
@@ -858,9 +857,9 @@ func ExpandAppServiceAuthSettings(input []interface{}) web.SiteAuthSettingsPrope
 				siteAuthSettingsProperties.ClientID = utils.String(v.(string))
 			}
 
-			if v, ok := activeDirectorySetting["client_secret"]; ok {
-				siteAuthSettingsProperties.ClientSecret = utils.String(v.(string))
-			}
+			// if v, ok := activeDirectorySetting["client_secret"]; ok {
+			// 	siteAuthSettingsProperties.ClientSecret = utils.String(v.(string))
+			// }
 
 			if v, ok := activeDirectorySetting["allowed_audiences"]; ok {
 				input := v.([]interface{})
@@ -885,9 +884,9 @@ func ExpandAppServiceAuthSettings(input []interface{}) web.SiteAuthSettingsPrope
 				siteAuthSettingsProperties.FacebookAppID = utils.String(v.(string))
 			}
 
-			if v, ok := facebookSetting["app_secret"]; ok {
-				siteAuthSettingsProperties.FacebookAppSecret = utils.String(v.(string))
-			}
+			// if v, ok := facebookSetting["app_secret"]; ok {
+			// 	siteAuthSettingsProperties.FacebookAppSecret = utils.String(v.(string))
+			// }
 
 			if v, ok := facebookSetting["oauth_scopes"]; ok {
 				input := v.([]interface{})
@@ -912,9 +911,9 @@ func ExpandAppServiceAuthSettings(input []interface{}) web.SiteAuthSettingsPrope
 				siteAuthSettingsProperties.GoogleClientID = utils.String(v.(string))
 			}
 
-			if v, ok := googleSetting["client_secret"]; ok {
-				siteAuthSettingsProperties.GoogleClientSecret = utils.String(v.(string))
-			}
+			// if v, ok := googleSetting["client_secret"]; ok {
+			// 	siteAuthSettingsProperties.GoogleClientSecret = utils.String(v.(string))
+			// }
 
 			if v, ok := googleSetting["oauth_scopes"]; ok {
 				input := v.([]interface{})
@@ -939,9 +938,9 @@ func ExpandAppServiceAuthSettings(input []interface{}) web.SiteAuthSettingsPrope
 				siteAuthSettingsProperties.MicrosoftAccountClientID = utils.String(v.(string))
 			}
 
-			if v, ok := microsoftSetting["client_secret"]; ok {
-				siteAuthSettingsProperties.MicrosoftAccountClientSecret = utils.String(v.(string))
-			}
+			// if v, ok := microsoftSetting["client_secret"]; ok {
+			// 	siteAuthSettingsProperties.MicrosoftAccountClientSecret = utils.String(v.(string))
+			// }
 
 			if v, ok := microsoftSetting["oauth_scopes"]; ok {
 				input := v.([]interface{})
@@ -966,9 +965,9 @@ func ExpandAppServiceAuthSettings(input []interface{}) web.SiteAuthSettingsPrope
 				siteAuthSettingsProperties.TwitterConsumerKey = utils.String(v.(string))
 			}
 
-			if v, ok := twitterSetting["consumer_secret"]; ok {
-				siteAuthSettingsProperties.TwitterConsumerSecret = utils.String(v.(string))
-			}
+			// if v, ok := twitterSetting["consumer_secret"]; ok {
+			// 	siteAuthSettingsProperties.TwitterConsumerSecret = utils.String(v.(string))
+			// }
 		}
 	}
 
@@ -1047,9 +1046,9 @@ func FlattenAppServiceAuthSettings(input *web.SiteAuthSettingsProperties) []inte
 
 		activeDirectorySetting["client_id"] = *input.ClientID
 
-		if input.ClientSecret != nil {
-			activeDirectorySetting["client_secret"] = *input.ClientSecret
-		}
+		// if input.ClientSecret != nil {
+		// 	activeDirectorySetting["client_secret"] = *input.ClientSecret
+		// }
 
 		if input.AllowedAudiences != nil {
 			activeDirectorySetting["allowed_audiences"] = *input.AllowedAudiences
@@ -1067,9 +1066,9 @@ func FlattenAppServiceAuthSettings(input *web.SiteAuthSettingsProperties) []inte
 
 		facebookSetting["app_id"] = *input.FacebookAppID
 
-		if input.FacebookAppSecret != nil {
-			facebookSetting["app_secret"] = *input.FacebookAppSecret
-		}
+		// if input.FacebookAppSecret != nil {
+		// 	facebookSetting["app_secret"] = *input.FacebookAppSecret
+		// }
 
 		if input.FacebookOAuthScopes != nil {
 			facebookSetting["oauth_scopes"] = *input.FacebookOAuthScopes
@@ -1087,9 +1086,9 @@ func FlattenAppServiceAuthSettings(input *web.SiteAuthSettingsProperties) []inte
 
 		googleSetting["client_id"] = *input.GoogleClientID
 
-		if input.GoogleClientSecret != nil {
-			googleSetting["client_secret"] = *input.GoogleClientSecret
-		}
+		// if input.GoogleClientSecret != nil {
+		// 	googleSetting["client_secret"] = *input.GoogleClientSecret
+		// }
 
 		if input.GoogleOAuthScopes != nil {
 			googleSetting["oauth_scopes"] = *input.GoogleOAuthScopes
@@ -1107,9 +1106,9 @@ func FlattenAppServiceAuthSettings(input *web.SiteAuthSettingsProperties) []inte
 
 		microsoftSetting["client_id"] = *input.MicrosoftAccountClientID
 
-		if input.MicrosoftAccountClientSecret != nil {
-			microsoftSetting["client_secret"] = *input.MicrosoftAccountClientSecret
-		}
+		// if input.MicrosoftAccountClientSecret != nil {
+		// 	microsoftSetting["client_secret"] = *input.MicrosoftAccountClientSecret
+		// }
 
 		if input.MicrosoftAccountOAuthScopes != nil {
 			microsoftSetting["oauth_scopes"] = *input.MicrosoftAccountOAuthScopes
@@ -1127,9 +1126,9 @@ func FlattenAppServiceAuthSettings(input *web.SiteAuthSettingsProperties) []inte
 
 		twitterSetting["consumer_key"] = *input.TwitterConsumerKey
 
-		if input.TwitterConsumerSecret != nil {
-			twitterSetting["consumer_secret"] = *input.TwitterConsumerSecret
-		}
+		// if input.TwitterConsumerSecret != nil {
+		// 	twitterSetting["consumer_secret"] = *input.TwitterConsumerSecret
+		// }
 
 		twitterSettings = append(twitterSettings, twitterSetting)
 	}
@@ -1626,15 +1625,15 @@ func ExpandAppServiceStorageAccounts(input []interface{}) map[string]*web.AzureS
 		saType := vals["type"].(string)
 		saAccountName := vals["account_name"].(string)
 		saShareName := vals["share_name"].(string)
-		saAccessKey := vals["access_key"].(string)
+		// saAccessKey := vals["access_key"].(string)
 		saMountPath := vals["mount_path"].(string)
 
 		output[saName] = &web.AzureStorageInfoValue{
 			Type:        web.AzureStorageType(saType),
 			AccountName: utils.String(saAccountName),
 			ShareName:   utils.String(saShareName),
-			AccessKey:   utils.String(saAccessKey),
-			MountPath:   utils.String(saMountPath),
+			// AccessKey:   utils.String(saAccessKey),
+			MountPath: utils.String(saMountPath),
 		}
 	}
 
@@ -1654,9 +1653,9 @@ func FlattenAppServiceStorageAccounts(input map[string]*web.AzureStorageInfoValu
 		if v.ShareName != nil {
 			result["share_name"] = *v.ShareName
 		}
-		if v.AccessKey != nil {
-			result["access_key"] = *v.AccessKey
-		}
+		// if v.AccessKey != nil {
+		// 	result["access_key"] = *v.AccessKey
+		// }
 		if v.MountPath != nil {
 			result["mount_path"] = *v.MountPath
 		}
