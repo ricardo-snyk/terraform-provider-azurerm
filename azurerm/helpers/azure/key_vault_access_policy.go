@@ -111,6 +111,7 @@ func SchemaKeyVaultStoragePermissions() *schema.Schema {
 				string(keyvault.StoragePermissionsSet),
 				string(keyvault.StoragePermissionsSetsas),
 				string(keyvault.StoragePermissionsUpdate),
+				"all", // RM-4457
 			}, false),
 		},
 	}
