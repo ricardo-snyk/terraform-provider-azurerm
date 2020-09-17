@@ -15,9 +15,9 @@ func ExtendedAuditingSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"storage_endpoint": {
-					Type:         schema.TypeString,
-					Required:     true,
-					ValidateFunc: validation.IsURLWithHTTPS,
+					Type:     schema.TypeString,
+					Required: true,
+					//ValidateFunc: validation.IsURLWithHTTPS,
 				},
 
 				"storage_account_access_key_is_secondary": {
