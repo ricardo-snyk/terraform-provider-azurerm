@@ -510,10 +510,10 @@ func resourceArmRedisCacheRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error making Read request on Azure Redis Cache %s: %s", name, err)
 	}
 
-	keysResp, err := client.ListKeys(ctx, resGroup, name)
-	if err != nil {
-		return fmt.Errorf("Error making ListKeys request on Azure Redis Cache %s: %s", name, err)
-	}
+	// keysResp, err := client.ListKeys(ctx, resGroup, name)
+	// if err != nil {
+	// 	return fmt.Errorf("Error making ListKeys request on Azure Redis Cache %s: %s", name, err)
+	// }
 
 	patchSchedulesClient := meta.(*clients.Client).Redis.PatchSchedulesClient
 
@@ -561,8 +561,8 @@ func resourceArmRedisCacheRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error setting `redis_configuration`: %+v", err)
 	}
 
-	d.Set("primary_access_key", keysResp.PrimaryKey)
-	d.Set("secondary_access_key", keysResp.SecondaryKey)
+	// d.Set("primary_access_key", keysResp.PrimaryKey)
+	// d.Set("secondary_access_key", keysResp.SecondaryKey)
 
 	return tags.FlattenAndSet(d, resp.Tags)
 }

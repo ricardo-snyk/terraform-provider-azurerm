@@ -576,51 +576,51 @@ func resourceArmCosmosDbAccountRead(d *schema.ResourceData, meta interface{}) er
 
 	// ListKeys returns a data structure containing a DatabaseAccountListReadOnlyKeysResult pointer
 	// implying that it also returns the read only keys, however this appears to not be the case
-	keys, err := client.ListKeys(ctx, resourceGroup, name)
-	if err != nil {
-		if utils.ResponseWasNotFound(keys.Response) {
-			log.Printf("[DEBUG] Keys were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
-			d.SetId("")
-			return nil
-		}
+	// keys, err := client.ListKeys(ctx, resourceGroup, name)
+	// if err != nil {
+	// 	if utils.ResponseWasNotFound(keys.Response) {
+	// 		log.Printf("[DEBUG] Keys were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
+	// 		d.SetId("")
+	// 		return nil
+	// 	}
 
-		return fmt.Errorf("[ERROR] Unable to List Write keys for CosmosDB Account %s: %s", name, err)
-	}
-	d.Set("primary_master_key", keys.PrimaryMasterKey)
-	d.Set("secondary_master_key", keys.SecondaryMasterKey)
+	// 	return fmt.Errorf("[ERROR] Unable to List Write keys for CosmosDB Account %s: %s", name, err)
+	// }
+	// d.Set("primary_master_key", keys.PrimaryMasterKey)
+	// d.Set("secondary_master_key", keys.SecondaryMasterKey)
 
-	readonlyKeys, err := client.ListReadOnlyKeys(ctx, resourceGroup, name)
-	if err != nil {
-		if utils.ResponseWasNotFound(keys.Response) {
-			log.Printf("[DEBUG] Read Only Keys were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
-			d.SetId("")
-			return nil
-		}
+	// readonlyKeys, err := client.ListReadOnlyKeys(ctx, resourceGroup, name)
+	// if err != nil {
+	// 	if utils.ResponseWasNotFound(keys.Response) {
+	// 		log.Printf("[DEBUG] Read Only Keys were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
+	// 		d.SetId("")
+	// 		return nil
+	// 	}
 
-		return fmt.Errorf("[ERROR] Unable to List read-only keys for CosmosDB Account %s: %s", name, err)
-	}
-	d.Set("primary_readonly_master_key", readonlyKeys.PrimaryReadonlyMasterKey)
-	d.Set("secondary_readonly_master_key", readonlyKeys.SecondaryReadonlyMasterKey)
+	// 	return fmt.Errorf("[ERROR] Unable to List read-only keys for CosmosDB Account %s: %s", name, err)
+	// }
+	// d.Set("primary_readonly_master_key", readonlyKeys.PrimaryReadonlyMasterKey)
+	// d.Set("secondary_readonly_master_key", readonlyKeys.SecondaryReadonlyMasterKey)
 
-	connStringResp, err := client.ListConnectionStrings(ctx, resourceGroup, name)
-	if err != nil {
-		if utils.ResponseWasNotFound(keys.Response) {
-			log.Printf("[DEBUG] Connection Strings were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
-			d.SetId("")
-			return nil
-		}
+	// connStringResp, err := client.ListConnectionStrings(ctx, resourceGroup, name)
+	// if err != nil {
+	// 	if utils.ResponseWasNotFound(keys.Response) {
+	// 		log.Printf("[DEBUG] Connection Strings were not found for CosmosDB Account %q (Resource Group %q) - removing from state!", name, resourceGroup)
+	// 		d.SetId("")
+	// 		return nil
+	// 	}
 
-		return fmt.Errorf("[ERROR] Unable to List connection strings for CosmosDB Account %s: %s", name, err)
-	}
+	// 	return fmt.Errorf("[ERROR] Unable to List connection strings for CosmosDB Account %s: %s", name, err)
+	// }
 
-	var connStrings []string
-	if connStringResp.ConnectionStrings != nil {
-		connStrings = make([]string, len(*connStringResp.ConnectionStrings))
-		for i, v := range *connStringResp.ConnectionStrings {
-			connStrings[i] = *v.ConnectionString
-		}
-	}
-	d.Set("connection_strings", connStrings)
+	// var connStrings []string
+	// if connStringResp.ConnectionStrings != nil {
+	// 	connStrings = make([]string, len(*connStringResp.ConnectionStrings))
+	// 	for i, v := range *connStringResp.ConnectionStrings {
+	// 		connStrings[i] = *v.ConnectionString
+	// 	}
+	// }
+	// d.Set("connection_strings", connStrings)
 
 	return tags.FlattenAndSet(d, resp.Tags)
 }
