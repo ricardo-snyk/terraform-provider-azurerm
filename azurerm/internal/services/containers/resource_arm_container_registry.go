@@ -501,21 +501,24 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("storage_account_id", account.ID)
 	}
 
-	if *resp.AdminUserEnabled {
-		credsResp, errList := client.ListCredentials(ctx, resourceGroup, name)
-		if errList != nil {
-			return fmt.Errorf("Error making Read request on Azure Container Registry %s for Credentials: %s", name, errList)
-		}
+	// if *resp.AdminUserEnabled {
+	// 	credsResp, errList := client.ListCredentials(ctx, resourceGroup, name)
+	// 	if errList != nil {
+	// 		return fmt.Errorf("Error making Read request on Azure Container Registry %s for Credentials: %s", name, errList)
+	// 	}
 
-		d.Set("admin_username", credsResp.Username)
-		for _, v := range *credsResp.Passwords {
-			d.Set("admin_password", v.Value)
-			break
-		}
-	} else {
-		d.Set("admin_username", "")
-		d.Set("admin_password", "")
-	}
+	// 	d.Set("admin_username", credsResp.Username)
+	// 	for _, v := range *credsResp.Passwords {
+	// 		d.Set("admin_password", v.Value)
+	// 		break
+	// 	}
+	// } else {
+
+	// We do not want passwords in our statefiles and this api call requires more permissions than the Reader role grants
+	d.Set("admin_username", "")
+	d.Set("admin_password", "")
+
+	// }
 
 	replications, err := replicationClient.List(ctx, resourceGroup, name)
 	if err != nil {
