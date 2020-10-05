@@ -93,16 +93,17 @@ func resourceArmContainerRegistry() *schema.Resource {
 				Computed: true,
 			},
 
-			"admin_username": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			// We do not want any admin creds in our statefiles
+			// "admin_username": {
+			// 	Type:     schema.TypeString,
+			// 	Computed: true,
+			// },
 
-			"admin_password": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
+			// "admin_password": {
+			// 	Type:      schema.TypeString,
+			// 	Computed:  true,
+			// 	Sensitive: true,
+			// },
 
 			"network_rule_set": {
 				Type:       schema.TypeList,
@@ -513,11 +514,8 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 	// 		break
 	// 	}
 	// } else {
-
-	// We do not want passwords in our statefiles and this api call requires more permissions than the Reader role grants
-	d.Set("admin_username", "")
-	d.Set("admin_password", "")
-
+	// 		d.Set("admin_username", "")
+	// 		d.Set("admin_password", "")
 	// }
 
 	replications, err := replicationClient.List(ctx, resourceGroup, name)
