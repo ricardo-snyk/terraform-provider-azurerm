@@ -267,9 +267,9 @@ func resourceArmCosmosDbAccount() *schema.Resource {
 				Sensitive: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-				},
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return true
+					DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+						return true
+					},
 				},
 			},
 
