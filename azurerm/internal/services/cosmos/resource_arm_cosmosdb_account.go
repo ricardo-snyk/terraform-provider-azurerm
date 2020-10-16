@@ -261,14 +261,14 @@ func resourceArmCosmosDbAccount() *schema.Resource {
 				Sensitive: true,
 			},
 
-			"connection_strings": {
-				Type:      schema.TypeList,
-				Computed:  true,
-				Sensitive: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
+			// "connection_strings": {
+			// 	Type:      schema.TypeList,
+			// 	Computed:  true,
+			// 	Sensitive: true,
+			// 	Elem: &schema.Schema{
+			// 		Type: schema.TypeString,
+			// 	},
+			// },
 
 			"tags": tags.Schema(),
 		},
