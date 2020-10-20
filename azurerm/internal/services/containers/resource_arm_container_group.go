@@ -109,13 +109,14 @@ func resourceArmContainerGroup() *schema.Resource {
 							ValidateFunc: validation.StringIsNotEmpty,
 						},
 
-						"password": {
-							Type:         schema.TypeString,
-							Required:     true,
-							Sensitive:    true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringIsNotEmpty,
-						},
+						// RM-4603 AZ API always returns blank for this field
+						// "password": {
+						// 	Type:      schema.TypeString,
+						// 	Required:  true,
+						// 	Sensitive: true,
+						// 	ForceNew:  true,
+						// ValidateFunc: validation.StringIsNotEmpty,
+						// },
 					},
 				},
 			},
@@ -130,11 +131,13 @@ func resourceArmContainerGroup() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"SystemAssigned",
-								"UserAssigned",
-								"SystemAssigned, UserAssigned",
-							}, false),
+							// RM-4603 This is "None" if an identity was set
+							// and then later removed
+							// ValidateFunc: validation.StringInSlice([]string{
+							// 	"SystemAssigned",
+							// 	"UserAssigned",
+							// 	"SystemAssigned, UserAssigned",
+							// }, false),
 						},
 						"principal_id": {
 							Type:     schema.TypeString,
@@ -1012,10 +1015,11 @@ func flattenContainerImageRegistryCredentials(d *schema.ResourceData, input *[]c
 	if input == nil {
 		return nil
 	}
-	configsOld := d.Get("image_registry_credential").([]interface{})
+	// RM-4603
+	// configsOld := d.Get("image_registry_credential").([]interface{})
 
 	output := make([]interface{}, 0)
-	for i, cred := range *input {
+	for _, cred := range *input {
 		credConfig := make(map[string]interface{})
 		if cred.Server != nil {
 			credConfig["server"] = *cred.Server
@@ -1024,15 +1028,16 @@ func flattenContainerImageRegistryCredentials(d *schema.ResourceData, input *[]c
 			credConfig["username"] = *cred.Username
 		}
 
-		if len(configsOld) > i {
-			data := configsOld[i].(map[string]interface{})
-			oldServer := data["server"].(string)
-			if cred.Server != nil && *cred.Server == oldServer {
-				if v, ok := d.GetOk(fmt.Sprintf("image_registry_credential.%d.password", i)); ok {
-					credConfig["password"] = v.(string)
-				}
-			}
-		}
+		// RM-4603
+		// if len(configsOld) > i {
+		// 	data := configsOld[i].(map[string]interface{})
+		// 	oldServer := data["server"].(string)
+		// 	if cred.Server != nil && *cred.Server == oldServer {
+		// 		if v, ok := d.GetOk(fmt.Sprintf("image_registry_credential.%d.password", i)); ok {
+		// 			credConfig["password"] = v.(string)
+		// 		}
+		// 	}
+		// }
 
 		output = append(output, credConfig)
 	}
