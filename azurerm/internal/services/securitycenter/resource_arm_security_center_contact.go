@@ -137,9 +137,15 @@ func resourceArmSecurityCenterContactRead(d *schema.ResourceData, meta interface
 	if err != nil {
 		return fmt.Errorf("Invalid Security Center Contact ID %q: %+v", d.Id(), err)
 	}
-	name, ok := id.Path["securityContact"]
+
+	// Microsoft changed the pluralization of this URL segment. Let's support
+	// both ways of doing it here just in case they switch back.
+	name, ok := id.Path["securityContacts"]
 	if !ok {
-		return fmt.Errorf("Could not find securityContact in ID: %q", d.Id())
+		name, ok = id.Path["securityContact"]
+		if !ok {
+			return fmt.Errorf("Could not find securityContact in ID: %q", d.Id())
+		}
 	}
 
 	resp, err := client.Get(ctx, name)
