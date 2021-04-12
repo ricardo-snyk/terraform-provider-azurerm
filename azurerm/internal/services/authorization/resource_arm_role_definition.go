@@ -56,6 +56,11 @@ func resourceArmRoleDefinition() *schema.Resource {
 				Optional: true,
 			},
 
+			"role_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"permissions": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -196,6 +201,7 @@ func resourceArmRoleDefinitionRead(d *schema.ResourceData, meta interface{}) err
 	if props := resp.RoleDefinitionProperties; props != nil {
 		d.Set("name", props.RoleName)
 		d.Set("description", props.Description)
+		d.Set("role_type", props.RoleType)
 
 		permissions := flattenRoleDefinitionPermissions(props.Permissions)
 		if err := d.Set("permissions", permissions); err != nil {
