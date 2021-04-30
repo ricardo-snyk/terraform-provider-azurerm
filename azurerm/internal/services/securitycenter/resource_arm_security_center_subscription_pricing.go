@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/timeouts"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
@@ -44,8 +45,48 @@ func resourceArmSecurityCenterSubscriptionPricing() *schema.Resource {
 					string(security.Standard),
 				}, false),
 			},
+			"resource_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "VirtualMachines",
+				ValidateFunc: validation.StringInSlice([]string{
+					"AppServices",
+					"ContainerRegistry",
+					"KeyVaults",
+					"KubernetesService",
+					"SqlServers",
+					"SqlServerVirtualMachines",
+					"StorageAccounts",
+					"VirtualMachines",
+					"Arm",
+					"Dns",
+				}, false),
+			},
 		},
 	}
+}
+
+type SecurityCenterSubscriptionPricingId struct {
+	ResourceType string
+}
+
+func SecurityCenterSubscriptionPricingID(input string) (*SecurityCenterSubscriptionPricingId, error) {
+	id, err := azure.ParseAzureResourceID(input)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse Security Center Subscription Pricing ID %q: %+v", input, err)
+	}
+
+	pricing := SecurityCenterSubscriptionPricingId{}
+
+	if pricing.ResourceType, err = id.PopSegment("pricings"); err != nil {
+		return nil, err
+	}
+
+	if err := id.ValidateNoEmptySegments(input); err != nil {
+		return nil, err
+	}
+
+	return &pricing, nil
 }
 
 func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -86,6 +127,11 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
+	id, err := SecurityCenterSubscriptionPricingID(d.Id())
+	if err != nil {
+		return err
+	}
+
 	resp, err := client.GetSubscriptionPricing(ctx, securityCenterSubscriptionPricingName)
 	if err != nil {
 		if utils.ResponseWasNotFound(resp.Response) {
@@ -100,6 +146,8 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 	if properties := resp.PricingProperties; properties != nil {
 		d.Set("tier", properties.PricingTier)
 	}
+
+	d.Set("resource_type", id.ResourceType)
 
 	return nil
 }
