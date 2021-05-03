@@ -874,7 +874,8 @@ func resourceArmVirtualMachineRead(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if profile := props.OsProfile; profile != nil {
-			if err := d.Set("os_profile", schema.NewSet(resourceArmVirtualMachineStorageOsProfileHash, flattenAzureRmVirtualMachineOsProfile(profile))); err != nil {
+			osProfile := flattenAzureRmVirtualMachineOsProfile(profile, name)
+			if err := d.Set("os_profile", schema.NewSet(resourceArmVirtualMachineStorageOsProfileHash, osProfile)); err != nil {
 				return fmt.Errorf("Error setting `os_profile`: %#v", err)
 			}
 
@@ -1269,10 +1270,18 @@ func flattenAzureRmVirtualMachineDataDisk(disks *[]compute.DataDisk, disksInfo [
 	return result
 }
 
-func flattenAzureRmVirtualMachineOsProfile(input *compute.OSProfile) []interface{} {
+func flattenAzureRmVirtualMachineOsProfile(input *compute.OSProfile, defaultName string) []interface{} {
 	result := make(map[string]interface{})
-	result["computer_name"] = *input.ComputerName
-	result["admin_username"] = *input.AdminUsername
+	if input.ComputerName != nil {
+		result["computer_name"] = *input.ComputerName
+	} else {
+		result["computer_name"] = defaultName
+	}
+	if input.AdminUsername != nil {
+		result["admin_username"] = *input.AdminUsername
+	} else {
+		result["admin_username"] = ""
+	}
 	if input.CustomData != nil {
 		result["custom_data"] = *input.CustomData
 	}
