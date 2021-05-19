@@ -153,13 +153,13 @@ func resourceArmMsSqlElasticPool() *schema.Resource {
 			"tags": tags.Schema(),
 		},
 
-		CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
-			if err := azure.MSSQLElasticPoolValidateSKU(diff); err != nil {
-				return err
-			}
+		// CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
+		// 	if err := azure.MSSQLElasticPoolValidateSKU(diff); err != nil {
+		// 		return err
+		// 	}
 
-			return nil
-		},
+		// 	return nil
+		// },
 	}
 }
 
