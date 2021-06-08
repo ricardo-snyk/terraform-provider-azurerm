@@ -1502,10 +1502,15 @@ func flattenAzureRmVirtualMachineScaleSetStorageProfileImageReference(image *com
 func flattenAzureRmVirtualMachineScaleSetSku(sku *compute.Sku) []interface{} {
 	result := make(map[string]interface{})
 	if sku != nil {
-		result["name"] = *sku.Name
-		result["capacity"] = *sku.Capacity
+		if sku.Name != nil {
+			result["name"] = *sku.Name
+		}
 
-		if *sku.Tier != "" {
+		if sku.Capacity != nil {
+			result["capacity"] = *sku.Capacity
+		}
+
+		if sku.Tier != nil && *sku.Tier != "" {
 			result["tier"] = *sku.Tier
 		}
 	}
