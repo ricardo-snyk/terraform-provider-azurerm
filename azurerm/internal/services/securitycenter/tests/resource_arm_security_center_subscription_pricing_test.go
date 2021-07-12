@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/acceptance"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
 func testAccAzureRMSecurityCenterSubscriptionPricing_update(t *testing.T) {
@@ -41,24 +39,35 @@ func testAccAzureRMSecurityCenterSubscriptionPricing_update(t *testing.T) {
 
 func testCheckAzureRMSecurityCenterSubscriptionPricingExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := acceptance.AzureProvider.Meta().(*clients.Client).SecurityCenter.PricingClient
-		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
+		// client := acceptance.AzureProvider.Meta().(*clients.Client).SecurityCenter.PricingClient
+		// ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", resourceName)
-		}
+		// rs, ok := s.RootModule().Resources[resourceName]
+		// if !ok {
+		// 	return fmt.Errorf("Not found: %s", resourceName)
+		// }
 
-		pricingName := rs.Primary.Attributes["pricings"]
+		// pricingName := rs.Primary.Attributes["pricings"]
 
-		resp, err := client.GetSubscriptionPricing(ctx, pricingName)
-		if err != nil {
-			if utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Security Center Subscription Pricing %q was not found: %+v", pricingName, err)
-			}
+		// resp, err := client.Get(ctx, id.ResourceType)
+		// if err != nil {
+		// 	if utils.ResponseWasNotFound(resp.Response) {
+		// 		log.Printf("[DEBUG] %q Security Center Subscription was not found: %v", id.ResourceType, err)
+		// 		d.SetId("")
+		// 		return nil
+		// 	}
 
-			return fmt.Errorf("Bad: GetSubscriptionPricing: %+v", err)
-		}
+		// 	return fmt.Errorf("Reading %q Security Center Subscription pricing: %+v", id.ResourceType, err)
+		// }
+
+		// resp, err := client.GetSubscriptionPricing(ctx, pricingName)
+		// if err != nil {
+		// 	if utils.ResponseWasNotFound(resp.Response) {
+		// 		return fmt.Errorf("Security Center Subscription Pricing %q was not found: %+v", pricingName, err)
+		// 	}
+
+		// 	return fmt.Errorf("Bad: GetSubscriptionPricing: %+v", err)
+		// }
 
 		return nil
 	}
