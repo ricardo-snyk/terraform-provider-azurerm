@@ -1,189 +1,219 @@
 package securitycenter
 
-import (
-	"fmt"
-	"log"
-	"time"
+// import (
+// 	"context"
+// 	"fmt"
+// 	"log"
+// 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/features"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/timeouts"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
-)
+// 	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v3.0/security"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/services/loganalytics/parse"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/tf/pluginsdk"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/tf/validation"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/timeouts"
+// 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
+// )
 
-//only valid name is default
-// Message="Invalid workspace settings name 'kttest' , only default is allowed "
-const securityCenterWorkspaceName = "default"
+// // only valid name is default
+// // Message="Invalid workspace settings name 'kttest' , only default is allowed "
+// const securityCenterWorkspaceName = "default"
 
-func resourceArmSecurityCenterWorkspace() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceArmSecurityCenterWorkspaceCreateUpdate,
-		Read:   resourceArmSecurityCenterWorkspaceRead,
-		Update: resourceArmSecurityCenterWorkspaceCreateUpdate,
-		Delete: resourceArmSecurityCenterWorkspaceDelete,
+// const pricingTierStandard = "Standard"
 
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+// func resourceSecurityCenterWorkspace() *pluginsdk.Resource {
+// 	return &pluginsdk.Resource{
+// 		Create: resourceSecurityCenterWorkspaceCreateUpdate,
+// 		Read:   resourceSecurityCenterWorkspaceRead,
+// 		Update: resourceSecurityCenterWorkspaceCreateUpdate,
+// 		Delete: resourceSecurityCenterWorkspaceDelete,
 
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Minute),
-			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(60 * time.Minute),
-		},
+// 		// TODO: replace this with an importer which validates the ID during import
+// 		Importer: pluginsdk.DefaultImporter(),
 
-		Schema: map[string]*schema.Schema{
-			"scope": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
-			},
+// 		Timeouts: &pluginsdk.ResourceTimeout{
+// 			Create: pluginsdk.DefaultTimeout(60 * time.Minute),
+// 			Read:   pluginsdk.DefaultTimeout(5 * time.Minute),
+// 			Update: pluginsdk.DefaultTimeout(60 * time.Minute),
+// 			Delete: pluginsdk.DefaultTimeout(60 * time.Minute),
+// 		},
 
-			"workspace_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: azure.ValidateResourceID,
-			},
-		},
-	}
-}
+// 		Schema: map[string]*pluginsdk.Schema{
+// 			"scope": {
+// 				Type:         pluginsdk.TypeString,
+// 				Required:     true,
+// 				ValidateFunc: validation.StringIsNotEmpty,
+// 			},
 
-func resourceArmSecurityCenterWorkspaceCreateUpdate(d *schema.ResourceData, meta interface{}) error {
-	priceClient := meta.(*clients.Client).SecurityCenter.PricingClient
-	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
-	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
-	defer cancel()
+// 			"workspace_id": {
+// 				Type:         pluginsdk.TypeString,
+// 				Required:     true,
+// 				ValidateFunc: azure.ValidateResourceID,
+// 			},
+// 		},
+// 	}
+// }
 
-	name := securityCenterWorkspaceName
+// func resourceSecurityCenterWorkspaceCreateUpdate(d *pluginsdk.ResourceData, meta interface{}) error {
+// 	priceClient := meta.(*clients.Client).SecurityCenter.PricingClient
+// 	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
+// 	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
+// 	defer cancel()
 
-	if features.ShouldResourcesBeImported() && d.IsNewResource() {
-		existing, err := client.Get(ctx, name)
-		if err != nil {
-			if !utils.ResponseWasNotFound(existing.Response) {
-				return fmt.Errorf("Error checking for presence of existing Security Center Workspace: %+v", err)
-			}
-		}
+// 	name := securityCenterWorkspaceName
 
-		if existing.ID != nil && *existing.ID != "" {
-			return tf.ImportAsExistsError("azurerm_security_center_workspace", *existing.ID)
-		}
-	}
+// 	if d.IsNewResource() {
+// 		existing, err := client.Get(ctx, name)
+// 		if err != nil {
+// 			if !utils.ResponseWasNotFound(existing.Response) {
+// 				return fmt.Errorf("Checking for presence of existing Security Center Workspace: %+v", err)
+// 			}
+// 		}
 
-	//get pricing tier, workspace can only be configured when tier is not Free.
-	//API does not error, it just doesn't set the workspace scope
-	price, err := priceClient.GetSubscriptionPricing(ctx, securityCenterSubscriptionPricingName)
-	if err != nil {
-		return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
-	}
+// 		if existing.ID != nil && *existing.ID != "" {
+// 			return tf.ImportAsExistsError("azurerm_security_center_workspace", *existing.ID)
+// 		}
+// 	}
 
-	if price.PricingProperties == nil {
-		return fmt.Errorf("Security Center Subscription pricing propertier is nil")
-	}
-	if price.PricingProperties.PricingTier == security.Free {
-		return fmt.Errorf("Security Center Subscription workspace cannot be set when pricing tier is `Free`")
-	}
+// 	// get pricing tier, workspace can only be configured when tier is not Free.
+// 	// API does not error, it just doesn't set the workspace scope
+// 	isPricingStandard, err := isPricingStandard(ctx, priceClient)
+// 	if err != nil {
+// 		return fmt.Errorf("Checking Security Center Subscription pricing tier %v", err)
+// 	}
 
-	contact := security.WorkspaceSetting{
-		WorkspaceSettingProperties: &security.WorkspaceSettingProperties{
-			Scope:       utils.String(d.Get("scope").(string)),
-			WorkspaceID: utils.String(d.Get("workspace_id").(string)),
-		},
-	}
+// 	if !isPricingStandard {
+// 		return fmt.Errorf("Security Center Subscription workspace cannot be set when pricing tier is `Free`")
+// 	}
 
-	if d.IsNewResource() {
-		if _, err = client.Create(ctx, name, contact); err != nil {
-			return fmt.Errorf("Error creating Security Center Workspace: %+v", err)
-		}
-	} else {
-		if _, err = client.Update(ctx, name, contact); err != nil {
-			return fmt.Errorf("Error updating Security Center Workspace: %+v", err)
-		}
-	}
+// 	workspaceID, err := parse.LogAnalyticsWorkspaceID(d.Get("workspace_id").(string))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	//api returns "" for workspace id after an create/update and eventually the new value
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"Waiting"},
-		Target:     []string{"Populated"},
-		MinTimeout: 30 * time.Second,
-		Refresh: func() (interface{}, string, error) {
-			resp, err2 := client.Get(ctx, name)
-			if err2 != nil {
-				return resp, "Error", fmt.Errorf("Error reading Security Center Workspace: %+v", err2)
-			}
+// 	contact := security.WorkspaceSetting{
+// 		WorkspaceSettingProperties: &security.WorkspaceSettingProperties{
+// 			Scope:       utils.String(d.Get("scope").(string)),
+// 			WorkspaceID: utils.String(workspaceID.ID()),
+// 		},
+// 	}
 
-			if properties := resp.WorkspaceSettingProperties; properties != nil {
-				if properties.WorkspaceID != nil && *properties.WorkspaceID != "" {
-					return resp, "Populated", nil
-				}
-			}
+// 	if d.IsNewResource() {
+// 		if _, err = client.Create(ctx, name, contact); err != nil {
+// 			return fmt.Errorf("Creating Security Center Workspace: %+v", err)
+// 		}
+// 	} else if _, err = client.Update(ctx, name, contact); err != nil {
+// 		return fmt.Errorf("Updating Security Center Workspace: %+v", err)
+// 	}
 
-			return resp, "Waiting", nil
-		},
-	}
+// 	// api returns "" for workspace id after an create/update and eventually the new value
+// 	stateConf := &pluginsdk.StateChangeConf{
+// 		Pending:    []string{"Waiting"},
+// 		Target:     []string{"Populated"},
+// 		MinTimeout: 30 * time.Second,
+// 		Refresh: func() (interface{}, string, error) {
+// 			resp, err2 := client.Get(ctx, name)
+// 			if err2 != nil {
+// 				return resp, "Error", fmt.Errorf("Reading Security Center Workspace: %+v", err2)
+// 			}
 
-	if d.IsNewResource() {
-		stateConf.Timeout = d.Timeout(schema.TimeoutCreate)
-	} else {
-		stateConf.Timeout = d.Timeout(schema.TimeoutUpdate)
-	}
+// 			if properties := resp.WorkspaceSettingProperties; properties != nil {
+// 				if properties.WorkspaceID != nil && *properties.WorkspaceID != "" {
+// 					return resp, "Populated", nil
+// 				}
+// 			}
 
-	resp, err := stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf("Error waiting: %+v", err)
-	}
+// 			return resp, "Waiting", nil
+// 		},
+// 	}
 
-	if d.IsNewResource() {
-		d.SetId(*resp.(security.WorkspaceSetting).ID)
-	}
+// 	if d.IsNewResource() {
+// 		stateConf.Timeout = d.Timeout(pluginsdk.TimeoutCreate)
+// 	} else {
+// 		stateConf.Timeout = d.Timeout(pluginsdk.TimeoutUpdate)
+// 	}
 
-	return resourceArmSecurityCenterWorkspaceRead(d, meta)
-}
+// 	resp, err := stateConf.WaitForStateContext(ctx)
+// 	if err != nil {
+// 		return fmt.Errorf("Waiting: %+v", err)
+// 	}
 
-func resourceArmSecurityCenterWorkspaceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
-	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
-	defer cancel()
+// 	if d.IsNewResource() {
+// 		d.SetId(*resp.(security.WorkspaceSetting).ID)
+// 	}
 
-	resp, err := client.Get(ctx, securityCenterWorkspaceName)
-	if err != nil {
-		if utils.ResponseWasNotFound(resp.Response) {
-			log.Printf("[DEBUG] Security Center Subscription Workspace was not found: %v", err)
-			d.SetId("")
-			return nil
-		}
+// 	return resourceSecurityCenterWorkspaceRead(d, meta)
+// }
 
-		return fmt.Errorf("Error reading Security Center Workspace: %+v", err)
-	}
+// func isPricingStandard(ctx context.Context, priceClient *security.PricingsClient) (bool, error) {
+// 	prices, err := priceClient.List(ctx)
+// 	if err != nil {
+// 		return false, fmt.Errorf("Listing Security Center Subscription pricing: %+v", err)
+// 	}
 
-	if properties := resp.WorkspaceSettingProperties; properties != nil {
-		d.Set("scope", properties.Scope)
-		d.Set("workspace_id", properties.WorkspaceID)
-	}
+// 	if prices.Value != nil {
+// 		for _, resourcePrice := range *prices.Value {
+// 			if resourcePrice.PricingProperties == nil {
+// 				return false, fmt.Errorf("%v Security Center Subscription pricing properties is nil", *resourcePrice.Type)
+// 			}
 
-	return nil
-}
+// 			if resourcePrice.PricingProperties.PricingTier == pricingTierStandard {
+// 				return true, nil
+// 			}
+// 		}
+// 	}
 
-func resourceArmSecurityCenterWorkspaceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
-	ctx, cancel := timeouts.ForDelete(meta.(*clients.Client).StopContext, d)
-	defer cancel()
+// 	return false, nil
+// }
 
-	resp, err := client.Delete(ctx, securityCenterWorkspaceName)
-	if err != nil {
-		if utils.ResponseWasNotFound(resp) {
-			log.Printf("[DEBUG] Security Center Subscription Workspace was not found: %v", err)
-			return nil
-		}
+// func resourceSecurityCenterWorkspaceRead(d *pluginsdk.ResourceData, meta interface{}) error {
+// 	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
+// 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
+// 	defer cancel()
 
-		return fmt.Errorf("Error deleting Security Center Workspace: %+v", err)
-	}
+// 	resp, err := client.Get(ctx, securityCenterWorkspaceName)
+// 	if err != nil {
+// 		if utils.ResponseWasNotFound(resp.Response) {
+// 			log.Printf("[DEBUG] Security Center Subscription Workspace was not found: %v", err)
+// 			d.SetId("")
+// 			return nil
+// 		}
 
-	return nil
-}
+// 		return fmt.Errorf("Reading Security Center Workspace: %+v", err)
+// 	}
+
+// 	if properties := resp.WorkspaceSettingProperties; properties != nil {
+// 		d.Set("scope", properties.Scope)
+// 		workspaceId := ""
+// 		if properties.WorkspaceID != nil {
+// 			id, err := parse.LogAnalyticsWorkspaceID(*properties.WorkspaceID)
+// 			if err != nil {
+// 				return fmt.Errorf("Reading Security Center Log Analytics Workspace ID: %+v", err)
+// 			}
+// 			workspaceId = id.ID()
+// 		}
+// 		d.Set("workspace_id", utils.String(workspaceId))
+// 	}
+
+// 	return nil
+// }
+
+// func resourceSecurityCenterWorkspaceDelete(d *pluginsdk.ResourceData, meta interface{}) error {
+// 	client := meta.(*clients.Client).SecurityCenter.WorkspaceClient
+// 	ctx, cancel := timeouts.ForDelete(meta.(*clients.Client).StopContext, d)
+// 	defer cancel()
+
+// 	resp, err := client.Delete(ctx, securityCenterWorkspaceName)
+// 	if err != nil {
+// 		if utils.ResponseWasNotFound(resp) {
+// 			log.Printf("[DEBUG] Security Center Subscription Workspace was not found: %v", err)
+// 			return nil
+// 		}
+
+// 		return fmt.Errorf("Deleting Security Center Workspace: %+v", err)
+// 	}
+
+// 	return nil
+// }
