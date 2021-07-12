@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
+	// "github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
+	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v3.0/security"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
@@ -20,10 +21,10 @@ const securityCenterSubscriptionPricingName = "default"
 
 func resourceArmSecurityCenterSubscriptionPricing() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceArmSecurityCenterSubscriptionPricingUpdate,
-		Read:   resourceArmSecurityCenterSubscriptionPricingRead,
-		Update: resourceArmSecurityCenterSubscriptionPricingUpdate,
-		Delete: resourceArmSecurityCenterSubscriptionPricingDelete,
+		Create: resourceSecurityCenterSubscriptionPricingUpdate,
+		Read:   resourceSecurityCenterSubscriptionPricingRead,
+		Update: resourceSecurityCenterSubscriptionPricingUpdate,
+		Delete: resourceSecurityCenterSubscriptionPricingDelete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -89,12 +90,41 @@ func SecurityCenterSubscriptionPricingID(input string) (*SecurityCenterSubscript
 	return &pricing, nil
 }
 
-func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
+	// client := meta.(*clients.Client).SecurityCenter.PricingClient
+	// ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
+	// defer cancel()
+
+	// name := securityCenterSubscriptionPricingName
+
+	// // not doing import check as afaik it always exists (cannot be deleted)
+	// // all this resource does is flip a boolean
+
+	// pricing := security.Pricing{
+	// 	PricingProperties: &security.PricingProperties{
+	// 		PricingTier: security.PricingTier(d.Get("tier").(string)),
+	// 	},
+	// }
+
+	// if _, err := client.UpdateSubscriptionPricing(ctx, name, pricing); err != nil {
+	// 	return fmt.Errorf("Error creating/updating Security Center Subscription pricing: %+v", err)
+	// }
+
+	// resp, err := client.GetSubscriptionPricing(ctx, name)
+	// if err != nil {
+	// 	return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
+	// }
+	// if resp.ID == nil {
+	// 	return fmt.Errorf("Security Center Subscription pricing ID is nil")
+	// }
+
+	// d.SetId(*resp.ID)
+
+	// return resourceArmSecurityCenterSubscriptionPricingRead(d, meta)
+
 	client := meta.(*clients.Client).SecurityCenter.PricingClient
 	ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
-
-	name := securityCenterSubscriptionPricingName
 
 	// not doing import check as afaik it always exists (cannot be deleted)
 	// all this resource does is flip a boolean
@@ -105,13 +135,15 @@ func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, 
 		},
 	}
 
-	if _, err := client.UpdateSubscriptionPricing(ctx, name, pricing); err != nil {
-		return fmt.Errorf("Error creating/updating Security Center Subscription pricing: %+v", err)
+	resource_type := d.Get("resource_type").(string)
+
+	if _, err := client.Update(ctx, resource_type, pricing); err != nil {
+		return fmt.Errorf("Creating/updating Security Center Subscription pricing: %+v", err)
 	}
 
-	resp, err := client.GetSubscriptionPricing(ctx, name)
+	resp, err := client.Get(ctx, resource_type)
 	if err != nil {
-		return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
+		return fmt.Errorf("Reading Security Center Subscription pricing: %+v", err)
 	}
 	if resp.ID == nil {
 		return fmt.Errorf("Security Center Subscription pricing ID is nil")
@@ -119,10 +151,10 @@ func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, 
 
 	d.SetId(*resp.ID)
 
-	return resourceArmSecurityCenterSubscriptionPricingRead(d, meta)
+	return resourceSecurityCenterSubscriptionPricingRead(d, meta)
 }
 
-func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client).SecurityCenter.PricingClient
 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
@@ -132,16 +164,27 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 		return err
 	}
 
-	resp, err := client.GetSubscriptionPricing(ctx, securityCenterSubscriptionPricingName)
+	resp, err := client.Get(ctx, id.ResourceType)
 	if err != nil {
 		if utils.ResponseWasNotFound(resp.Response) {
-			log.Printf("[DEBUG] Security Center Subscription was not found: %v", err)
+			log.Printf("[DEBUG] %q Security Center Subscription was not found: %v", id.ResourceType, err)
 			d.SetId("")
 			return nil
 		}
 
-		return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
+		return fmt.Errorf("Reading %q Security Center Subscription pricing: %+v", id.ResourceType, err)
 	}
+
+	// resp, err := client.GetSubscriptionPricing(ctx, securityCenterSubscriptionPricingName)
+	// if err != nil {
+	// 	if utils.ResponseWasNotFound(resp.Response) {
+	// 		log.Printf("[DEBUG] Security Center Subscription was not found: %v", err)
+	// 		d.SetId("")
+	// 		return nil
+	// 	}
+
+	// 	return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
+	// }
 
 	log.Printf("whc resp: %#v", resp)
 	log.Printf("whc pricing properties: %#v", resp.PricingProperties)
@@ -155,7 +198,7 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 	return nil
 }
 
-func resourceArmSecurityCenterSubscriptionPricingDelete(_ *schema.ResourceData, _ interface{}) error {
+func resourceSecurityCenterSubscriptionPricingDelete(_ *schema.ResourceData, _ interface{}) error {
 	log.Printf("[DEBUG] Security Center Subscription deletion invocation")
 	return nil //cannot be deleted.
 }
