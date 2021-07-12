@@ -143,6 +143,9 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 		return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
 	}
 
+	log.Printf("whc resp: %#v", resp)
+	log.Printf("whc pricing properties: %#v", resp.PricingProperties)
+
 	if properties := resp.PricingProperties; properties != nil {
 		d.Set("tier", properties.PricingTier)
 	}
