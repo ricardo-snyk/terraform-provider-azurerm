@@ -21,10 +21,10 @@ const securityCenterSubscriptionPricingName = "default"
 
 func resourceArmSecurityCenterSubscriptionPricing() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSecurityCenterSubscriptionPricingUpdate,
-		Read:   resourceSecurityCenterSubscriptionPricingRead,
-		Update: resourceSecurityCenterSubscriptionPricingUpdate,
-		Delete: resourceSecurityCenterSubscriptionPricingDelete,
+		Create: resourceArmSecurityCenterSubscriptionPricingUpdate,
+		Read:   resourceArmSecurityCenterSubscriptionPricingRead,
+		Update: resourceArmSecurityCenterSubscriptionPricingUpdate,
+		Delete: resourceArmSecurityCenterSubscriptionPricingDelete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -90,7 +90,7 @@ func SecurityCenterSubscriptionPricingID(input string) (*SecurityCenterSubscript
 	return &pricing, nil
 }
 
-func resourceSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
 	// client := meta.(*clients.Client).SecurityCenter.PricingClient
 	// ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
 	// defer cancel()
@@ -151,10 +151,10 @@ func resourceSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, met
 
 	d.SetId(*resp.ID)
 
-	return resourceSecurityCenterSubscriptionPricingRead(d, meta)
+	return resourceArmSecurityCenterSubscriptionPricingRead(d, meta)
 }
 
-func resourceSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, meta interface{}) error {
+func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client).SecurityCenter.PricingClient
 	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
@@ -198,7 +198,7 @@ func resourceSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceSecurityCenterSubscriptionPricingDelete(_ *schema.ResourceData, _ interface{}) error {
+func resourceArmSecurityCenterSubscriptionPricingDelete(_ *schema.ResourceData, _ interface{}) error {
 	log.Printf("[DEBUG] Security Center Subscription deletion invocation")
 	return nil //cannot be deleted.
 }
