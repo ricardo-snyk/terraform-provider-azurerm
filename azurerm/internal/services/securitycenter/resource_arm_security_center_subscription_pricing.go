@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	// "github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v1.0/security"
 	"github.com/Azure/azure-sdk-for-go/services/preview/security/mgmt/v3.0/security"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -91,37 +90,6 @@ func SecurityCenterSubscriptionPricingID(input string) (*SecurityCenterSubscript
 }
 
 func resourceArmSecurityCenterSubscriptionPricingUpdate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*clients.Client).SecurityCenter.PricingClient
-	// ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
-	// defer cancel()
-
-	// name := securityCenterSubscriptionPricingName
-
-	// // not doing import check as afaik it always exists (cannot be deleted)
-	// // all this resource does is flip a boolean
-
-	// pricing := security.Pricing{
-	// 	PricingProperties: &security.PricingProperties{
-	// 		PricingTier: security.PricingTier(d.Get("tier").(string)),
-	// 	},
-	// }
-
-	// if _, err := client.UpdateSubscriptionPricing(ctx, name, pricing); err != nil {
-	// 	return fmt.Errorf("Error creating/updating Security Center Subscription pricing: %+v", err)
-	// }
-
-	// resp, err := client.GetSubscriptionPricing(ctx, name)
-	// if err != nil {
-	// 	return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
-	// }
-	// if resp.ID == nil {
-	// 	return fmt.Errorf("Security Center Subscription pricing ID is nil")
-	// }
-
-	// d.SetId(*resp.ID)
-
-	// return resourceArmSecurityCenterSubscriptionPricingRead(d, meta)
-
 	client := meta.(*clients.Client).SecurityCenter.PricingClient
 	ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
@@ -174,20 +142,6 @@ func resourceArmSecurityCenterSubscriptionPricingRead(d *schema.ResourceData, me
 
 		return fmt.Errorf("Reading %q Security Center Subscription pricing: %+v", id.ResourceType, err)
 	}
-
-	// resp, err := client.GetSubscriptionPricing(ctx, securityCenterSubscriptionPricingName)
-	// if err != nil {
-	// 	if utils.ResponseWasNotFound(resp.Response) {
-	// 		log.Printf("[DEBUG] Security Center Subscription was not found: %v", err)
-	// 		d.SetId("")
-	// 		return nil
-	// 	}
-
-	// 	return fmt.Errorf("Error reading Security Center Subscription pricing: %+v", err)
-	// }
-
-	log.Printf("whc resp: %#v", resp)
-	log.Printf("whc pricing properties: %#v", resp.PricingProperties)
 
 	if properties := resp.PricingProperties; properties != nil {
 		d.Set("tier", properties.PricingTier)
