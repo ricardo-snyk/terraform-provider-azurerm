@@ -23,4 +23,6 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
+replace github.com/hashicorp/terraform-plugin-test/v2 => github.com/Mongey/terraform-plugin-test/v2 v2.1.3-0.20201231030340-31624e2320cd
+
 go 1.13
