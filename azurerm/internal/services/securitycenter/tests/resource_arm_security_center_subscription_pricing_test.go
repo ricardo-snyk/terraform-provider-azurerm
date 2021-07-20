@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -49,15 +50,14 @@ func testCheckAzureRMSecurityCenterSubscriptionPricingExists(resourceName string
 			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		pricingName := rs.Primary.Attributes["pricings"]
-
-		resp, err := client.GetSubscriptionPricing(ctx, pricingName)
+		resp, err := client.Get(ctx, rs.Type)
 		if err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Security Center Subscription Pricing %q was not found: %+v", pricingName, err)
+				log.Printf("[DEBUG] %q Security Center Subscription was not found: %v", rs.Type, err)
+				return nil
 			}
 
-			return fmt.Errorf("Bad: GetSubscriptionPricing: %+v", err)
+			return fmt.Errorf("Reading %q Security Center Subscription pricing: %+v", rs.Type, err)
 		}
 
 		return nil
