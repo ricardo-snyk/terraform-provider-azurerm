@@ -12,6 +12,7 @@ type Client struct {
 	ServerKeysClient                                   *sql.ServerKeysClient
 	ServerSecurityAlertPoliciesClient                  *sql.ServerSecurityAlertPoliciesClient
 	ServerVulnerabilityAssessmentsClient               *sql.ServerVulnerabilityAssessmentsClient
+	TransparentDataEncryptionsClient                   *sql.TransparentDataEncryptionsClient
 }
 
 func NewClient(o *common.ClientOptions) *Client {
@@ -30,11 +31,15 @@ func NewClient(o *common.ClientOptions) *Client {
 	ServerVulnerabilityAssessmentsClient := sql.NewServerVulnerabilityAssessmentsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&ServerVulnerabilityAssessmentsClient.Client, o.ResourceManagerAuthorizer)
 
+	TransparentDataEncryptionsClient := sql.NewTransparentDataEncryptionsClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
+	o.ConfigureClient(&TransparentDataEncryptionsClient.Client, o.ResourceManagerAuthorizer)
+
 	return &Client{
 		ElasticPoolsClient:                                 &ElasticPoolsClient,
 		EncryptionProtectorClient:                          &EncryptionProtectorClient,
 		DatabaseVulnerabilityAssessmentRuleBaselinesClient: &DatabaseVulnerabilityAssessmentRuleBaselinesClient,
 		ServerSecurityAlertPoliciesClient:                  &ServerSecurityAlertPoliciesClient,
 		ServerVulnerabilityAssessmentsClient:               &ServerVulnerabilityAssessmentsClient,
+		TransparentDataEncryptionsClient:                   &TransparentDataEncryptionsClient,
 	}
 }
