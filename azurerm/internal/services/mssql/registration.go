@@ -30,7 +30,9 @@ func (r Registration) SupportedResources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
 		"azurerm_mssql_elasticpool":                                     resourceArmMsSqlElasticPool(),
 		"azurerm_mssql_database_vulnerability_assessment_rule_baseline": resourceArmMssqlDatabaseVulnerabilityAssessmentRuleBaseline(),
+		"azurerm_mssql_database_transparent_data_encryption":            resourceArmMsSqlDatabaseTransparentDataEncryption(),
 		"azurerm_mssql_server_security_alert_policy":                    resourceArmMssqlServerSecurityAlertPolicy(),
+		"azurerm_mssql_server_transparent_data_encryption":              resourceArmMsSqlTransparentDataEncryption(),
 		"azurerm_mssql_server_vulnerability_assessment":                 resourceArmMssqlServerVulnerabilityAssessment(),
 	}
 }
