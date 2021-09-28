@@ -4,6 +4,7 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
-	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/timeouts"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
@@ -61,7 +61,12 @@ func resourceArmPostgreSQLConfigurationSetCreate(d *schema.ResourceData, meta in
 
 func resourceArmPostgreSQLConfigurationSetRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client).Postgres.ConfigurationsClient
-	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
+	// Manually creating the context instead of using timeouts.ForRead. The timeouts in
+	// the schema above do not get used here. The way that this ResourceData gets
+	// constructed by the plugin SDK, all the timeouts are set to nil, resulting in a
+	// 450-second timeout (this timeout might be on Azure's side). Creating the context
+	// this way reliably gets us a 30-second timeout.
+	ctx, cancel := context.WithTimeout(meta.(*clients.Client).StopContext, 30*time.Second)
 	defer cancel()
 
 	id, err := azure.ParseAzureResourceID(d.Id())
