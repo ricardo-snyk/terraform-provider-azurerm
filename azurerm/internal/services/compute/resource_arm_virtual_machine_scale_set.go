@@ -782,7 +782,9 @@ func resourceArmVirtualMachineScaleSet() *schema.Resource {
 			"tags": tags.Schema(),
 		},
 
-		CustomizeDiff: azureRmVirtualMachineScaleSetCustomizeDiff,
+		// RM-6094: This function is only performing validation and it's not necessary
+		// in our use-case.
+		// CustomizeDiff: azureRmVirtualMachineScaleSetCustomizeDiff,
 	}
 }
 
