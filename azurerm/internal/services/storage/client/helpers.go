@@ -9,7 +9,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/services/storage/parsers"
 
-	"tfratelimiter"
+	"github.com/fugue/tfratelimiter"
 )
 
 var (
