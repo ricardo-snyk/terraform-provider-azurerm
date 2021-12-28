@@ -20,6 +20,9 @@ require (
 	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b
 	golang.org/x/net v0.0.0-20210326060303-6b1517762897
 	gopkg.in/yaml.v2 v2.3.0
+	tfratelimiter v0.0.0-00010101000000-000000000000 // indirect
 )
+
+replace tfratelimiter => ../tfratelimiter
 
 go 1.13

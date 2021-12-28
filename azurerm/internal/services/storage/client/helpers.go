@@ -8,6 +8,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/services/storage/parsers"
+
+	"tfratelimiter"
 )
 
 var (
@@ -81,6 +83,10 @@ func (client Client) FindAccount(ctx context.Context, accountName string) (*acco
 		return &existing, nil
 	}
 
+	subscriptionID := client.AccountsClient.BaseClient.SubscriptionID
+	if err := tfratelimiter.WaitForService(subscriptionID, tfratelimiter.Service_azurerm_storage, tfratelimiter.List, 1); err != nil {
+		return nil, err
+	}
 	accountsPage, err := client.AccountsClient.List(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Error retrieving storage accounts: %+v", err)
@@ -89,6 +95,9 @@ func (client Client) FindAccount(ctx context.Context, accountName string) (*acco
 	var accounts []storage.Account
 	for accountsPage.NotDone() {
 		accounts = append(accounts, accountsPage.Values()...)
+		if err := tfratelimiter.WaitForService(subscriptionID, tfratelimiter.Service_azurerm_storage, tfratelimiter.List, 1); err != nil {
+			return nil, err
+		}
 		err = accountsPage.NextWithContext(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("Error retrieving next page of storage accounts: %+v", err)
