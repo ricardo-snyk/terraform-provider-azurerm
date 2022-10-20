@@ -5,11 +5,11 @@ package features
 //
 // There's 5 new resources coming as a part of 2.0, which are intentionally feature-flagged off
 // until all 5 are supported:
-//  * `azurerm_linux_virtual_machine`
-//  * `azurerm_linux_virtual_machine_scale_set`
-//  * `azurerm_windows_virtual_machine`
-//  * `azurerm_windows_virtual_machine_scale_set`
-//  * `azurerm_virtual_machine_scale_set_extension`
+//   - `azurerm_linux_virtual_machine`
+//   - `azurerm_linux_virtual_machine_scale_set`
+//   - `azurerm_windows_virtual_machine`
+//   - `azurerm_windows_virtual_machine_scale_set`
+//   - `azurerm_virtual_machine_scale_set_extension`
 //
 // This feature-toggle defaults to off in 1.x versions of the Azure Provider, however this will
 // become enabled by default in version 2.0 of the Azure Provider (where this toggle will be removed).

@@ -1,4 +1,4 @@
-// This is a Fugue internal resource type.  
+// This is a Fugue internal resource type.
 // It aggregates the values from individual Configuration resources into one map.
 
 package mysql

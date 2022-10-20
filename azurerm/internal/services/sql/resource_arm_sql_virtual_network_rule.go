@@ -205,8 +205,8 @@ func resourceArmSqlVirtualNetworkRuleDelete(d *schema.ResourceData, meta interfa
 }
 
 /*
-	This function checks the format of the SQL Virtual Network Rule Name to make sure that
-	it does not contain any potentially invalid values.
+This function checks the format of the SQL Virtual Network Rule Name to make sure that
+it does not contain any potentially invalid values.
 */
 func ValidateSqlVirtualNetworkRuleName(v interface{}, k string) (warnings []string, errors []error) {
 	value := v.(string)
@@ -248,15 +248,15 @@ func ValidateSqlVirtualNetworkRuleName(v interface{}, k string) (warnings []stri
 }
 
 /*
-	This function refreshes and checks the state of the SQL Virtual Network Rule.
+This function refreshes and checks the state of the SQL Virtual Network Rule.
 
-	Response will contain a VirtualNetworkRuleProperties struct with a State property. The state property contain one of the following states (except ResponseNotFound).
-	* Deleting
-	* Initializing
-	* InProgress
-	* Unknown
-	* Ready
-	* ResponseNotFound (Custom state in case of 404)
+Response will contain a VirtualNetworkRuleProperties struct with a State property. The state property contain one of the following states (except ResponseNotFound).
+* Deleting
+* Initializing
+* InProgress
+* Unknown
+* Ready
+* ResponseNotFound (Custom state in case of 404)
 */
 func sqlVirtualNetworkStateStatusCodeRefreshFunc(ctx context.Context, client *sql.VirtualNetworkRulesClient, resourceGroup string, serverName string, name string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {

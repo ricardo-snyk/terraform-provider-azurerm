@@ -6,7 +6,7 @@ require (
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/btubbs/datetime v0.1.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/fugue/tfratelimiter v0.0.0-00010101000000-000000000000
+	tfratelimiter v0.0.0
 	github.com/google/uuid v1.1.2
 	github.com/hashicorp/go-azure-helpers v0.10.0
 	github.com/hashicorp/go-getter v1.5.3
@@ -23,6 +23,6 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/fugue/tfratelimiter => ./../tfratelimiter
+replace tfratelimiter => ../tfratelimiter
 
 go 1.13
