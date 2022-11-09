@@ -88,6 +88,7 @@ func resourceManagedDisk() *pluginsdk.Resource {
 					string(disks.DiskCreateOptionFromImage),
 					string(disks.DiskCreateOptionImport),
 					string(disks.DiskCreateOptionRestore),
+					string(disks.DiskCreateOptionUpload),
 				}, false),
 			},
 
